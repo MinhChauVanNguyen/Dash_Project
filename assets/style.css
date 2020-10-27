@@ -35,7 +35,7 @@ hr {
 
 .banner Img {
     position: relative;
-    height: 3rem;
+    height: 6rem;
     width: auto;
     margin-left: 2%;
 }
@@ -64,17 +64,6 @@ H5, H3 {
     min-height: calc(100vh - 5.5rem);
 }
 
-.table-row {
-    height: 63px;
-    vertical-align: middle;
-    font-size: 13px;
-}
-
-.wait_time_graph > div, .patient_score_graph > div {
-    height: 100% !important;
-    width: 100% !important;
-}
-
 .draglayer {
     cursor: pointer !important;
 }
@@ -85,9 +74,8 @@ H5, H3 {
     text-align: justify;
 }
 
-#control-card > p {
+#description-card > p {
     font-weight: bold;
-    margin-left:-50px;
 }
 
 #bike_volume_card {
@@ -101,27 +89,8 @@ H5, H3 {
     line-height: 2.5;
 }
 
-#patient_volume_hm {
-    height: 400px;
-}
 
-.table-row:nth-child(even) {
-    background-color: #f2f2f2;
-}
 
-.row-department > b {
-    display: table-cell;
-    vertical-align: middle;
-}
-
-#header_wait_time_min, #header_care_score {
-    display: table;
-}
-
-#header_wait_time_min > b, #header_care_score > b {
-    display: table-cell;
-    vertical-align: middle;
-}
 
 
 /*
