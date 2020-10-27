@@ -89,13 +89,8 @@ app.layout = html.Div(
                             html.Div(
                                 children=[dcc.Graph(id="bar_graph")],
                                 className="five columns"),
-                            html.Div(id='data-table', className="four columns tableDiv")
-                                # children=[
-                                #     dt.DataTable(id='data-table',
-                                #              style_header={'backgroundColor': 'rgb(30, 30, 30)'},
-                                #              style_cell={'textAlign': 'left'},
-                                #     )
-                                # ],
+                            html.Div(id='data-table', style={'margin-top': '20px'},
+                                     className="four columns offset-by-one")
                         ], className="row")
                     ]
                 )
@@ -110,10 +105,9 @@ app.layout = html.Div(
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
-#print('asd', isinstance([Output('bar_graph', 'figure'), Output('data-table', 'children')], list))
-#ls = [Output('bar_graph', 'figure'), Output('data-table', 'children')]
 @app.callback(
-    Output('data-table', 'children'),
+    [Output('bar_graph', 'figure'),
+     Output('data-table', 'children')],
     [Input(component_id='slct_state', component_property='value')]
 )
 
@@ -125,17 +119,16 @@ def update_output(user_selection):
     df = grouped_df.copy()
     df = df[df["State"] == user_selection]
 
-    df['Age_Group'] = df['Age_Group'].astype('category')
-    df['Age_Group'].cat.reorder_categories(["Youth (<25)", "Young Adults (25-34)", "Adults (35-64)", "Seniors (64+)"], inplace=True)
+    name_sort = {'Youth (<25)': 0, 'Young Adults (25-34)': 1, 'Adults (35-64)': 2, 'Seniors (64+)': 3}
+    df['name_sort'] = df['Age_Group'].map(name_sort)
 
-
-    print(df.dtypes)
+    df = df.sort_values(by='name_sort', ascending=True)
+    df = df.drop('name_sort', axis=1)
 
     #Table
     table = html.Div([
         dt.DataTable(
             id='data-table',
-            #columns=[{'name': i, 'id': i} for i in df.loc[:, ['Age_Group', 'Product_Category', 'Order_Quantity']]],
             columns=[
                 {'name': 'Age Group', 'id': 'Age_Group', 'type': 'text', 'editable': True},
                 {'name': 'Product Category', 'id': 'Product_Category', 'type': 'text', 'editable': True},
@@ -184,49 +177,47 @@ def update_output(user_selection):
             ])
         )
     ])
-    # Plotly Express
-    # fig = px.bar(
-    #         data_frame=df,
-    #         x='Age_Group',
-    #         y='Order_Quantity',
-    #         color='Product_Category',
-    #         opacity=0.6,
-    #         category_orders={"Age_Group": ["Youth (<25)", "Young Adults (25-34)", "Adults (35-64)", "Seniors (64+)"],
-    #                          "Product_Category": ["Clothing", "Bikes", "Accessories"]},
-    #         color_discrete_map={
-    #              'Accessories':'#0059b2',
-    #              'Bikes': '#4ca6ff',
-    #              'Clothing': '#99ccff'},
-    #         hover_data={'Order_Quantity':':,.0f'},
-    #         labels={'Age_Group':'<b>Age group</b>',
-    #                  'Order_Quantity':'<b>Order quantity</b>',
-    #                  'Product_Category':'<b>Product category</b>'})
-    #
-    # fig.update_layout(
-    #     width=700,
-    #     height=500,
-    #     #plot_bgcolor='rgba(0,0,0,0)',
-    #     legend_traceorder="reversed",
-    #     legend=dict(yanchor="bottom", y=1.02,
-    #                 xanchor= "right", x=1,
-    #                 orientation="h",
-    #                 bordercolor="Black",
-    #                 borderwidth=1.5),
-    #     xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1.5, linecolor='black'),
-    #     yaxis=dict(mirror=True, ticks='outside', showline=True),
-    #     margin=dict(l=50, r=20, t=30, b=20),
-    #     title_x=0.53,
-    #     font=dict(family="Helvetica Neue,  sans-serif"),
-    #     hoverlabel=dict(
-    #         bgcolor="white",
-    #         font_family="Helvetica Neue,  sans-serif"
-    #     )
-    # )
-    #
-    # columns = [{'name': col, 'id': col} for col in df.loc[:, ['Age_Group', 'Product_Category', 'Order_Quantity']]]
-    # data = df.to_dict(orient='records')
 
-    return table
+    # Plotly Express
+    fig = px.bar(
+            data_frame=df,
+            x='Age_Group',
+            y='Order_Quantity',
+            color='Product_Category',
+            opacity=0.6,
+            # category_orders={"Age_Group": ["Youth (<25)", "Young Adults (25-34)", "Adults (35-64)", "Seniors (64+)"],
+            #                  "Product_Category": ["Clothing", "Bikes", "Accessories"]},
+            color_discrete_map={
+                 'Accessories':'#0059b2',
+                 'Bikes': '#4ca6ff',
+                 'Clothing': '#99ccff'},
+            hover_data={'Order_Quantity':':,.0f'},
+            labels={'Age_Group':'<b>Age group</b>',
+                     'Order_Quantity':'<b>Order quantity</b>',
+                     'Product_Category':'<b>Product category</b>'})
+
+    fig.update_layout(
+        width=400,
+        height=500,
+        #plot_bgcolor='rgba(0,0,0,0)',
+        legend_traceorder="reversed",
+        legend=dict(yanchor="bottom", y=1.02,
+                    xanchor= "right", x=1,
+                    orientation="h",
+                    bordercolor="Black",
+                    borderwidth=1.5),
+        xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1.5, linecolor='black'),
+        yaxis=dict(mirror=True, ticks='outside', showline=True),
+        margin=dict(l=50, r=20, t=30, b=20),
+        title_x=0.53,
+        font=dict(family="Helvetica Neue,  sans-serif"),
+        hoverlabel=dict(
+            bgcolor="white",
+            font_family="Helvetica Neue,  sans-serif"
+        )
+    )
+
+    return fig, table
 
 
 # Run the server
