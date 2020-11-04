@@ -12,6 +12,10 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 import plotly.express as px
+import plotly.graph_objects as go
+
+import json
+import urllib.request
 
 app = dash.Dash(
     __name__,
@@ -21,37 +25,120 @@ app = dash.Dash(
 server = app.server
 app.config.suppress_callback_exceptions = True
 
-
 # Read data
-df = pd.read_csv('https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
+df = pd.read_csv(
+    'https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
 
-df.drop(df.columns.difference(['Age_Group','Product_Category','Order_Quantity', 'State']), 1, inplace=True)
-grouped_df = df.groupby(["State", "Age_Group", "Product_Category"])
-grouped_df = pd.DataFrame(grouped_df.sum().reset_index())
+df.drop(
+    df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
+    1, inplace=True)
 
-state_list = grouped_df["State"].unique()
+df = df.sort_values(by="Year")
+
+year_list = df["Year"].unique().tolist()
+
+# Convert Country and State data into dictionary
+country_df = df[["Country", "State"]]
+
+my_dict = dict()
+
+for i in country_df['Country'].unique().tolist():
+    country = country_df[country_df['Country'] == i]
+    my_dict[i] = country['State'].unique().tolist()
+
+
+def label_code(row):
+    if row['State'] == 'Oregon':
+        return 'OR'
+    elif row['State'] == 'California':
+        return 'CA'
+    elif row['State'] == 'Washington':
+        return 'WA'
+    elif row['State'] == 'Kentucky':
+        return 'KY'
+    elif row['State'] == 'Texas':
+        return 'TX'
+    elif row['State'] == 'New York':
+        return 'NY'
+    elif row['State'] == 'Florida':
+        return 'FL'
+    elif row['State'] == 'Illinois':
+        return 'IL'
+    elif row['State'] == 'South Carolina':
+        return 'SC'
+    elif row['State'] == 'North Carolina':
+        return 'NC'
+    elif row['State'] == 'Georgia':
+        return 'GA'
+    elif row['State'] == 'Virginia':
+        return 'VA'
+    elif row['State'] == 'Ohio':
+        return 'OH'
+    elif row['State'] == 'Wyoming':
+        return 'WY'
+    elif row['State'] == 'Missouri':
+        return 'MO'
+    elif row['State'] == 'Montana':
+        return 'MT'
+    elif row['State'] == 'Utah':
+        return 'UT'
+    elif row['State'] == 'Minnesota':
+        return 'MN'
+    elif row['State'] == 'Mississippi':
+        return 'MS'
+    elif row['State'] == 'Arizona':
+        return 'AZ'
+    elif row['State'] == 'Alabama':
+        return 'AL'
+    else:
+        return 'MA'
 
 
 def description_card():
-
     return html.Div(
         id="description-card",
         children=[
-            html.H5("Khabeef forever"),
-            html.H3("Welcome to my Dash Dashboard"),
+            html.H3("Title"),
             html.Div(
                 id="intro",
                 children="Explore clinic patient volume by time of day, waiting time, and care score. Click on the heatmap to visualize patient experience at different time points.",
             ),
             html.Br(),
-            html.P("Select State"),
-            dcc.Dropdown(id="slct_state",
-                         options=[{"label": i, "value": i} for i in state_list],
+            html.P("Select Country"),
+            dcc.Dropdown(id="slct_country",
+                         options=[{'label': c, 'value': c} for c in my_dict.keys()],
                          multi=False,
-                         value="British Columbia"
+                         value="Canada",
+                         clearable=False
+                         ),
+            html.Br(),
+            html.P("Select State"),
+            dcc.Dropdown(id="slct_state", clearable=False),
+            # options=[{"label": i, "value": i} for i in state_list],
+            # multi=False,
+            # value=state_list[0]),
+            html.Br(),
+            html.P("Grouped by:"),
+            dcc.Dropdown(
+                id='slct_group',
+                options=[
+                    {'label': 'Age group', 'value': 'Age_Group'},
+                    {'label': 'Gender', 'value': 'Customer_Gender'},
+                ],
+                value='Age_Group',
+                clearable=False
+            ),
+            html.Br(),
+            html.P("Select year"),
+            dcc.Dropdown(id="slct_year",
+                         options=[{"label": i, "value": i} for i in year_list],
+                         value=year_list[:],
+                         multi=True,
+                         clearable=False
                          ),
         ],
     )
+
 
 # ------------------------------------------------------------------------------
 # App layout
@@ -64,7 +151,10 @@ app.layout = html.Div(
         html.Div(
             id="banner",
             className="banner",
-            children=[html.Img(src=app.get_asset_url("Logo.png"))],
+            children=[
+                html.Img(src=app.get_asset_url("Logo.png")),
+                html.H5("TITLE")
+            ],
         ),
 
         # Left column
@@ -83,66 +173,113 @@ app.layout = html.Div(
                 html.Div(
                     id="bike_volume_card",
                     children=[
-                        html.B("Total bike related products bought for various Age groups"),
+                        html.B("Total bike related products bought by selected country, state and group"),
                         html.Hr(),
                         html.Div(children=[
                             html.Div(
                                 children=[dcc.Graph(id="bar_graph")],
                                 className="five columns"),
-                            html.Div(id='data-table', style={'margin-top': '20px'},
-                                     className="four columns offset-by-one")
+                            html.Div(
+                                children=[html.Div(id='data-table')],
+                                style={'margin-top': '20px'},
+                                className="four columns offset-by-one tableDiv")
                         ], className="row")
                     ]
-                )
-                        #html.Div(id='table-container', className='tableDiv'),
-                    ],
                 ),
+                html.Div(
+                    id="map_card",
+                    children=[
+                        html.Div(children=[
+                            dcc.Graph(id="map")
+                        ])
+                    ]
+                )
             ],
-        )
 
-
-
-
-# ------------------------------------------------------------------------------
-# Connect the Plotly graphs with Dash Components
-@app.callback(
-    [Output('bar_graph', 'figure'),
-     Output('data-table', 'children')],
-    [Input(component_id='slct_state', component_property='value')]
+        ),
+    ],
 )
 
 
+def read_geojson(url):
+    with urllib.request.urlopen(url) as url:
+        jdata = json.loads(url.read().decode())
+    return jdata
+
+# ------------------------------------------------------------------------------
+# Connect the Plotly graphs with Dash Components
+
+# chained callbacks for Country and State
+@app.callback(
+    Output(component_id='slct_state', component_property='options'),
+    [Input(component_id='slct_country', component_property='value')])
+def set_states_options(selected_country):
+    return [{'label': i, 'value': i} for i in my_dict[selected_country]]
 
 
-def update_output(user_selection):
+@app.callback(
+    Output(component_id='slct_state', component_property='value'),
+    [Input(component_id='slct_state', component_property='options')])
+def set_states_value(country_options):
+    return country_options[0]['value']
 
-    df = grouped_df.copy()
-    df = df[df["State"] == user_selection]
 
-    name_sort = {'Youth (<25)': 0, 'Young Adults (25-34)': 1, 'Adults (35-64)': 2, 'Seniors (64+)': 3}
-    df['name_sort'] = df['Age_Group'].map(name_sort)
+# callbacks for outputs
+@app.callback(
+    [Output(component_id='bar_graph', component_property='figure'),
+     Output(component_id='data-table', component_property='children'),
+     Output(component_id='map', component_property='figure')
+     ],
+    [Input(component_id='slct_country', component_property='value'),
+     Input(component_id='slct_state', component_property='value'),
+     Input(component_id='slct_group', component_property='value'),
+     Input(component_id='slct_year', component_property='value')
+     ]
+)
+def update_output(selected_country, selected_state, selected_group, selected_year):
+    if selected_year is None:
+        # PreventUpdate prevents ALL outputs updating
+        raise dash.exceptions.PreventUpdate
 
-    df = df.sort_values(by='name_sort', ascending=True)
-    df = df.drop('name_sort', axis=1)
+    grouped_df = df.loc[
+        (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
 
-    #Table
+    grouped_df = grouped_df.groupby(["Country", "State", selected_group, "Product_Category"])
+
+    grouped_df = pd.DataFrame(grouped_df.sum().reset_index())
+
+    if selected_group == "Age_Group":
+        name_sort = {'Youth (<25)': 0, 'Young Adults (25-34)': 1, 'Adults (35-64)': 2, 'Seniors (64+)': 3}
+        grouped_df['name_sort'] = grouped_df['Age_Group'].map(name_sort)
+
+        grouped_df = grouped_df.sort_values(by='name_sort', ascending=True)
+        grouped_df = grouped_df.drop('name_sort', axis=1)
+
+    else:
+        grouped_df = grouped_df
+
+    grouped_df = grouped_df
+
+    # Table
     table = html.Div([
         dt.DataTable(
-            id='data-table',
             columns=[
-                {'name': 'Age Group', 'id': 'Age_Group', 'type': 'text', 'editable': True},
+                {'name': 'Age group' if selected_group == "Age_Group" else 'Gender', 'id': selected_group,
+                 'type': 'text', 'editable': True},
                 {'name': 'Product Category', 'id': 'Product_Category', 'type': 'text', 'editable': True},
-                {'name': 'Order Quantity', 'id': 'Order_Quantity', 'type': 'numeric', 'editable': True}
+                {'name': 'Revenue', 'id': 'Revenue', 'type': 'numeric', 'editable': True}
             ],
-            data=df.to_dict('records'),
+            # columns=[{"name": i, "id": i} for i in grouped_df.columns],
+            data=grouped_df.to_dict('records'),
             style_table={
                 'maxHeight': '20%',
-                #'overflowY': 'scroll',
+                # 'overflowY': 'scroll',
                 'width': '30%',
                 'minWidth': '10%',
             },
             editable=True,
-            style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
+            style_header={'backgroundColor': 'rgb(30, 30, 30)',
+                          'color': 'white'},
             style_data={'whiteSpace': 'auto', 'height': 'auto', 'width': 'auto'},
             style_cell={'textAlign': 'left'},
             style_data_conditional=([
@@ -173,6 +310,20 @@ def update_output(user_selection):
                     },
                     'backgroundColor': '#7FDBFF',
                     'color': 'white'
+                } if selected_group == "Age_Group" else
+                {
+                    'if': {
+                        'filter_query': '{Customer_Gender} eq "F"',
+                    },
+                    'backgroundColor': 'dodgerblue',
+                    'color': 'white'
+                },
+                {
+                    'if': {
+                        'filter_query': '{Customer_Gender} eq "M"',
+                    },
+                    'backgroundColor': '#7FDBFF',
+                    'color': 'white'
                 }
             ])
         )
@@ -180,44 +331,141 @@ def update_output(user_selection):
 
     # Plotly Express
     fig = px.bar(
-            data_frame=df,
-            x='Age_Group',
-            y='Order_Quantity',
-            color='Product_Category',
-            opacity=0.6,
-            # category_orders={"Age_Group": ["Youth (<25)", "Young Adults (25-34)", "Adults (35-64)", "Seniors (64+)"],
-            #                  "Product_Category": ["Clothing", "Bikes", "Accessories"]},
-            color_discrete_map={
-                 'Accessories':'#0059b2',
-                 'Bikes': '#4ca6ff',
-                 'Clothing': '#99ccff'},
-            hover_data={'Order_Quantity':':,.0f'},
-            labels={'Age_Group':'<b>Age group</b>',
-                     'Order_Quantity':'<b>Order quantity</b>',
-                     'Product_Category':'<b>Product category</b>'})
-
+        data_frame=grouped_df,
+        x=selected_group,
+        y='Revenue',
+        color='Product_Category',
+        opacity=0.6,
+        color_discrete_map={
+            'Accessories': '#0059b2',
+            'Bikes': '#4ca6ff',
+            'Clothing': '#99ccff'},
+        hover_data={'Revenue': ':,.0f'},
+        labels={
+            'Age_Group' if selected_group == 'Age_Group' else 'Customer_Gender': '<b>Age group</b>' if selected_group == 'Age_Group' else '<b>Gender</b>',
+            'Revenue': '<b>Revenue</b>',
+            'Product_Category': '<b>Product category</b>'}
+    )
+    #
     fig.update_layout(
         width=400,
         height=500,
-        #plot_bgcolor='rgba(0,0,0,0)',
+        yaxis_tickprefix='$',
+        # plot_bgcolor='rgba(0,0,0,0)',
         legend_traceorder="reversed",
         legend=dict(yanchor="bottom", y=1.02,
-                    xanchor= "right", x=1,
-                    orientation="h",
-                    bordercolor="Black",
-                    borderwidth=1.5),
+                    xanchor="right", x=1,
+                    orientation="h"),
+        # bordercolor="Black",
+        # borderwidth=1.5),
         xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1.5, linecolor='black'),
         yaxis=dict(mirror=True, ticks='outside', showline=True),
         margin=dict(l=50, r=20, t=30, b=20),
         title_x=0.53,
-        font=dict(family="Helvetica Neue,  sans-serif"),
+        font=dict(family="Helvetica Neue, sans-serif"),
         hoverlabel=dict(
             bgcolor="white",
-            font_family="Helvetica Neue,  sans-serif"
+            font_family="Helvetica Neue, sans-serif"
         )
     )
 
-    return fig, table
+    fig.update_traces(
+        marker_line_color='black',  # bar border color
+        marker_line_width=1.5,
+        hovertemplate='<b>Age group</b>: %{x} <br>'
+                      # '<b>Product category</b>: %{name} <br>'
+                        '<b>Revenue</b>: %{y}')
+    # opacity=0.6)
+
+    ### USA
+    usa = df.loc[(df["Country"] == selected_country) & (df["Year"].isin(selected_year))]
+
+    usa = usa.groupby(['State', 'Product_Category'])
+    usa = pd.DataFrame(usa.sum().reset_index())
+
+    usa.drop(
+        usa.columns.difference(['Product_Category', 'Revenue', 'State']),
+        1, inplace=True)
+
+    usa = usa.pivot(index='State', columns='Product_Category', values='Revenue')
+
+    usa = usa.fillna(0)
+
+    usa.reset_index(level=0, inplace=True)
+
+    usa['state_code'] = usa.apply(lambda row: label_code(row), axis=1)
+
+    usa['Revenue'] = usa['Accessories'] + usa['Bikes'] + usa['Clothing']
+
+    for col in usa.columns:
+        usa[col] = usa[col].astype(str)
+
+    usa['text'] = '<b>State</b>: ' + usa['State'] + '<br>' + \
+                      '<b>Accessories Rev</b>: $' + usa['Accessories'] + '<br>' + \
+                      '<b>Bikes Rev</b>: $' + usa['Bikes'] + '<br>' + \
+                      '<b>Clothing Rev</b>: $' + usa['Clothing'] + '<br>' + \
+                      '<b>Total Rev</b>: $' + usa['Revenue']
+
+    ## Canada
+
+    canada_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson'
+
+    data = read_geojson(canada_url)
+
+    for i in data["features"]:
+        property = i['properties']
+        property['id'] = property.pop('cartodb_id')
+
+    canada = df.groupby(["Country", "State", "Product_Category"])
+
+    canada = pd.DataFrame(canada.sum().reset_index())
+
+    if selected_country == "United States":
+        my_map = go.Figure(
+            data=[
+                go.Choropleth(
+                    colorbar=dict(title='Revenue', ticklen=3),
+                    locationmode='USA-states',
+                    locations=usa['state_code'],
+                    z=usa["Revenue"],
+                    colorscale='Reds',
+                    text=usa['text'],
+            ),
+            ],
+            layout=dict(geo={'subunitcolor': 'black'})
+    )
+
+        my_map.update_layout(
+            title_text='USA map',
+            geo_scope='usa',
+            dragmode=False
+        )
+    else:
+        my_map = go.Figure(
+            data=[go.Choropleth(
+                geojson=data,
+                locations=canada["State"],
+                text=canada["State"],
+                z=canada["Revenue"],
+                colorscale='reds',
+                colorbar=dict(
+                    title='Revenue',
+                    thickness=20,
+                    ticklen=3),
+                hoverinfo='all',
+                marker_line_width=1,
+                marker_opacity=0.75)]
+        )
+
+        my_map.update_layout(title_text='Canada Map',
+                          title_x=0.5, width=700, height=700,
+                          geo=dict(
+                              lataxis=dict(range=[40, 70]),
+                              lonaxis=dict(range=[-130, -55]),
+                              scope="north america")
+                          )
+
+    return fig, table, my_map
 
 
 # Run the server
