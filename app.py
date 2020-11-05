@@ -15,7 +15,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import json
-import urllib.request
+import requests
+
+#from draft import update_map
 
 app = dash.Dash(
     __name__,
@@ -28,6 +30,8 @@ app.config.suppress_callback_exceptions = True
 # Read data
 df = pd.read_csv(
     'https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
+
+
 
 df.drop(
     df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
@@ -45,53 +49,6 @@ my_dict = dict()
 for i in country_df['Country'].unique().tolist():
     country = country_df[country_df['Country'] == i]
     my_dict[i] = country['State'].unique().tolist()
-
-
-def label_code(row):
-    if row['State'] == 'Oregon':
-        return 'OR'
-    elif row['State'] == 'California':
-        return 'CA'
-    elif row['State'] == 'Washington':
-        return 'WA'
-    elif row['State'] == 'Kentucky':
-        return 'KY'
-    elif row['State'] == 'Texas':
-        return 'TX'
-    elif row['State'] == 'New York':
-        return 'NY'
-    elif row['State'] == 'Florida':
-        return 'FL'
-    elif row['State'] == 'Illinois':
-        return 'IL'
-    elif row['State'] == 'South Carolina':
-        return 'SC'
-    elif row['State'] == 'North Carolina':
-        return 'NC'
-    elif row['State'] == 'Georgia':
-        return 'GA'
-    elif row['State'] == 'Virginia':
-        return 'VA'
-    elif row['State'] == 'Ohio':
-        return 'OH'
-    elif row['State'] == 'Wyoming':
-        return 'WY'
-    elif row['State'] == 'Missouri':
-        return 'MO'
-    elif row['State'] == 'Montana':
-        return 'MT'
-    elif row['State'] == 'Utah':
-        return 'UT'
-    elif row['State'] == 'Minnesota':
-        return 'MN'
-    elif row['State'] == 'Mississippi':
-        return 'MS'
-    elif row['State'] == 'Arizona':
-        return 'AZ'
-    elif row['State'] == 'Alabama':
-        return 'AL'
-    else:
-        return 'MA'
 
 
 def description_card():
@@ -112,11 +69,8 @@ def description_card():
                          clearable=False
                          ),
             html.Br(),
-            html.P("Select State"),
+            html.Div(id='state_label', style={'font-weight': 'bold', 'margin-bottom': '5px'}),
             dcc.Dropdown(id="slct_state", clearable=False),
-            # options=[{"label": i, "value": i} for i in state_list],
-            # multi=False,
-            # value=state_list[0]),
             html.Br(),
             html.P("Grouped by:"),
             dcc.Dropdown(
@@ -226,7 +180,8 @@ def set_states_value(country_options):
 
 # callbacks for outputs
 @app.callback(
-    [Output(component_id='bar_graph', component_property='figure'),
+    [Output(component_id='state_label', component_property='children'),
+     Output(component_id='bar_graph', component_property='figure'),
      Output(component_id='data-table', component_property='children'),
      Output(component_id='map', component_property='figure')
      ],
@@ -237,6 +192,15 @@ def set_states_value(country_options):
      ]
 )
 def update_output(selected_country, selected_state, selected_group, selected_year):
+    if selected_country == 'France':
+        container = "Select Department"
+    elif (selected_country == 'Australia' or selected_country == 'United Kingdom'):
+        container = "Select Region"
+    elif selected_country == 'Canada':
+        container = "Select Province"
+    else:
+        container = "Select State"
+
     if selected_year is None:
         # PreventUpdate prevents ALL outputs updating
         raise dash.exceptions.PreventUpdate
@@ -378,7 +342,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
     # opacity=0.6)
 
     ### USA
-    usa = df.loc[(df["Country"] == selected_country) & (df["Year"].isin(selected_year))]
+    usa = df.loc[(df["Country"] == "United States") & (df["Year"].isin(selected_year))]
 
     usa = usa.groupby(['State', 'Product_Category'])
     usa = pd.DataFrame(usa.sum().reset_index())
@@ -406,20 +370,6 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                       '<b>Clothing Rev</b>: $' + usa['Clothing'] + '<br>' + \
                       '<b>Total Rev</b>: $' + usa['Revenue']
 
-    ## Canada
-
-    canada_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson'
-
-    data = read_geojson(canada_url)
-
-    for i in data["features"]:
-        property = i['properties']
-        property['id'] = property.pop('cartodb_id')
-
-    canada = df.groupby(["Country", "State", "Product_Category"])
-
-    canada = pd.DataFrame(canada.sum().reset_index())
-
     if selected_country == "United States":
         my_map = go.Figure(
             data=[
@@ -433,39 +383,43 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
             ),
             ],
             layout=dict(geo={'subunitcolor': 'black'})
-    )
+        )
 
         my_map.update_layout(
             title_text='USA map',
             geo_scope='usa',
             dragmode=False
         )
-    else:
-        my_map = go.Figure(
-            data=[go.Choropleth(
-                geojson=data,
-                locations=canada["State"],
-                text=canada["State"],
-                z=canada["Revenue"],
-                colorscale='reds',
-                colorbar=dict(
-                    title='Revenue',
-                    thickness=20,
-                    ticklen=3),
-                hoverinfo='all',
-                marker_line_width=1,
-                marker_opacity=0.75)]
+    elif selected_country == "Canada":
+        my_map = update_map(
+            selected_country='Canada',
+            country_url='https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson',
+            json_state='name',
+            scope='north america'
         )
+    elif selected_country == "Germany":
+        my_map = update_map(
+            selected_country='Germany',
+            country_url='https://gist.githubusercontent.com/oscar6echo/4423770/raw/990e602cd47eeca87d31a3e25d2d633ed21e2005/dataBundesLander.json',
+            json_state='NAME_1',
+            scope='europe'
+        )
+    elif selected_country == "France":
+        my_map = update_map(
+            selected_country='France',
+            country_url='https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson',
+            json_state='nom',
+            scope='europe')
+    elif selected_country == "Australia":
+        my_map = update_map(
+            selected_country="Australia",
+            country_url='https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json',
+            json_state='STATE_NAME',
+            scope='world')
+    else:
+        return None
 
-        my_map.update_layout(title_text='Canada Map',
-                          title_x=0.5, width=700, height=700,
-                          geo=dict(
-                              lataxis=dict(range=[40, 70]),
-                              lonaxis=dict(range=[-130, -55]),
-                              scope="north america")
-                          )
-
-    return fig, table, my_map
+    return container, fig, table, my_map
 
 
 # Run the server

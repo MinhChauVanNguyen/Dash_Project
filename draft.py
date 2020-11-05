@@ -1,104 +1,160 @@
-import plotly.express as px
 import pandas as pd
-import plotly.express as px  # (version 4.7.0)
-
-pd.options.mode.chained_assignment = None  # default='warn'
-
-#import psutil
-import plotly.io as pio
-
-#pio.renderers.default = 'png'
+import requests
+import plotly.express as px
+import plotly.graph_objs as go
 
 df = pd.read_csv('https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
-#
-#
-# year_list = df["Year"].unique().tolist()
-#
-# #grouped_df = df.loc[(df["Country"] == "Canada") & (df["State"] == "British Columbia") & (df["Year"].isin([2011, 2012, 2013, 2014, 2015]))]
-#
-# usa = df.loc[(df["Country"] == "United States")]
-
-#print(usa[["State", "Revenue"]])
-
-#print(usa["State"].unique())
 
 
+def label_code(row):
+    if row['State'] == 'Oregon':
+        return 'OR'
+    elif row['State'] == 'California':
+        return 'CA'
+    elif row['State'] == 'Washington':
+        return 'WA'
+    elif row['State'] == 'Kentucky':
+        return 'KY'
+    elif row['State'] == 'Texas':
+        return 'TX'
+    elif row['State'] == 'New York':
+        return 'NY'
+    elif row['State'] == 'Florida':
+        return 'FL'
+    elif row['State'] == 'Illinois':
+        return 'IL'
+    elif row['State'] == 'South Carolina':
+        return 'SC'
+    elif row['State'] == 'North Carolina':
+        return 'NC'
+    elif row['State'] == 'Georgia':
+        return 'GA'
+    elif row['State'] == 'Virginia':
+        return 'VA'
+    elif row['State'] == 'Ohio':
+        return 'OH'
+    elif row['State'] == 'Wyoming':
+        return 'WY'
+    elif row['State'] == 'Missouri':
+        return 'MO'
+    elif row['State'] == 'Montana':
+        return 'MT'
+    elif row['State'] == 'Utah':
+        return 'UT'
+    elif row['State'] == 'Minnesota':
+        return 'MN'
+    elif row['State'] == 'Mississippi':
+        return 'MS'
+    elif row['State'] == 'Arizona':
+        return 'AZ'
+    elif row['State'] == 'Alabama':
+        return 'AL'
+    else:
+        return 'MA'
 
-# usa['state_code'] = usa.apply(lambda row: label_code(row), axis=1)
-#
-# usa = usa[usa["Product_Category"] == "Bikes"]
 
-# fig = px.choropleth(
-#         data_frame=usa,
-#         locationmode='USA-states',
-#         locations='state_code',
-#         scope="usa",
-#         color='Revenue',
-#         hover_data=['State', 'Revenue'],
-#         color_continuous_scale="Viridis")
-# #
-# fig.show()
+def update_map(selected_country, json_state, scope, country_url):
+
+    data = df.loc[df["Country"] == selected_country]
+
+    data = data.groupby(['State', 'Product_Category'])
+    data = pd.DataFrame(data.sum().reset_index())
+
+    data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue']), 1, inplace=True)
+
+    data = data.pivot(index='State', columns='Product_Category', values='Revenue')
+
+    data = data.fillna(0)
+
+    data.reset_index(level=0, inplace=True)
+
+    if selected_country == 'United States':
+        data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
+    else:
+        data = data
+
+    data['Revenue'] = data['Accessories'] + data['Bikes'] + data['Clothing']
+
+    data.rename(columns={'State': json_state}, inplace=True)
+
+    for col in data.columns:
+        data[col] = data[col].astype(str)
+
+    data['text'] = 'State: ' + data[json_state] + '<br>' + \
+                      'Accessories Rev: $' + data['Accessories'] + '<br>' + \
+                      'Bikes Rev: $' + data['Bikes'] + '<br>' + \
+                      'Clothing Rev: $' + data['Clothing'] + '<br>' + \
+                      'Total Rev: $' + data['Revenue']
+
+    data['Revenue'] = data['Revenue'].apply(pd.to_numeric)
+
+    if selected_country == 'United States':
+        my_map = go.Figure(
+            data=[
+                go.Choropleth(
+                    colorbar=dict(title='Revenue', ticklen=3),
+                    locationmode='USA-states',
+                    locations=data['state_code'],
+                    z=data["Revenue"],
+                    colorscale='Reds',
+                    text=data['text'],
+                ),
+            ],
+            layout=dict(geo={'subunitcolor': 'black'})
+        )
+
+        my_map.update_layout(
+            title_text='USA map',
+            geo_scope=scope,
+            dragmode=False
+        )
+    #
+    else:
+        json_data = requests.get(country_url).json()
+
+        tuple_feature_id = ('properties', json_state)
+
+        my_map = px.choropleth(
+            data_frame=data,
+            geojson=json_data,
+            locations=json_state,
+            featureidkey=".".join(tuple_feature_id),
+            color='Revenue',
+            hover_data=['text'],
+            color_continuous_scale="Magma",
+            scope=scope)
+
+        my_map.update_geos(
+            visible=False,
+            showcountries=True,
+            showcoastlines=False,
+            showland=False,
+            fitbounds="locations",
+            showsubunits=True,
+            subunitcolor="Blue",
+            resolution=110)
+
+        my_map.update_layout(dragmode=False)
+
+    my_map.show()
+
+    return my_map
 
 
+# update_map(
+#      selected_country="United States",
+#      country_url='',
+#      json_state='State',
+#      scope='usa')
 
-import plotly.graph_objects as go
-import json
-import urllib.request
-import random
+update_map(
+    country_url='https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json',
+    selected_country="Australia",
+    json_state='STATE_NAME',
+    scope='world')
 
-canada = df.loc[(df["Country"] == "Canada")]
-
-print(canada["State"].unique())
-
-
-def read_geojson(url):
-    with urllib.request.urlopen(url) as url:
-        jdata = json.loads(url.read().decode())
-    return jdata
-
-
-#
-irish_url = 'https://gist.githubusercontent.com/pnewall/9a122c05ba2865c3a58f15008548fbbd/raw/5bb4f84d918b871ee0e8b99f60dde976bb711d7c/ireland_counties.geojson'
-
-canada_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson'
-
-jdata = read_geojson(canada_url)
-print(jdata["features"][0])
-
-data = read_geojson(irish_url)
-list = data['features']
-location = [item['id'] for item in list]
-#print(location)
-
-#locations = canada["State"].unique()
-# locations = ['British Columbia', 'Alberta', 'Ontario']
-# z = [20, 15, 4]
-# randomlist = []
-# for i in range(0, 26):
-#     n = random.randint(0, 10)
-#     randomlist.append(n)
-#
-# z = randomlist
-# print(z)
-
-#
-#
-# fig = go.Figure(go.Choroplethmapbox(z=z,  # This is the data.
-#                                     locations=locations,
-#                                     colorscale='reds',
-#                                     colorbar=dict(thickness=20, ticklen=3),
-#                                     geojson=jdata,
-#                                     text=locations,
-#                                     hoverinfo='all',
-#                                     marker_line_width=1,
-#                                     marker_opacity=0.75))
-# #
-# #
-# fig.update_layout(title_text='Symptom Map',
-#                   title_x=0.5, width=700, height=700,
-#                   mapbox=dict(center= dict(lat=54, lon=-120),
-#                               style='carto-positron',
-#                               zoom=5.6,
-#                               ))
-# fig.show()
-
+# update_map(
+#     selected_country='France',
+#     country_url='https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson',
+#     json_state='nom',
+#     scope='europe')
