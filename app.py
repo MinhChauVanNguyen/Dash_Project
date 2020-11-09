@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 import json
 import requests
 
-#from draft import update_map
+from helper_function import label_code
 
 app = dash.Dash(
     __name__,
@@ -31,7 +31,9 @@ app.config.suppress_callback_exceptions = True
 df = pd.read_csv(
     'https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
 
-
+uk = 'United Kingdom'
+mask = df['Country'].str.contains(uk, na=False, regex=True, case=False)
+df = df[~mask]
 
 df.drop(
     df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
@@ -65,7 +67,7 @@ def description_card():
             dcc.Dropdown(id="slct_country",
                          options=[{'label': c, 'value': c} for c in my_dict.keys()],
                          multi=False,
-                         value="Canada",
+                         value="United States",
                          clearable=False
                          ),
             html.Br(),
@@ -155,11 +157,6 @@ app.layout = html.Div(
 )
 
 
-def read_geojson(url):
-    with urllib.request.urlopen(url) as url:
-        jdata = json.loads(url.read().decode())
-    return jdata
-
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
 
@@ -182,8 +179,7 @@ def set_states_value(country_options):
 @app.callback(
     [Output(component_id='state_label', component_property='children'),
      Output(component_id='bar_graph', component_property='figure'),
-     Output(component_id='data-table', component_property='children'),
-     Output(component_id='map', component_property='figure')
+     Output(component_id='data-table', component_property='children')
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
@@ -194,16 +190,17 @@ def set_states_value(country_options):
 def update_output(selected_country, selected_state, selected_group, selected_year):
     if selected_country == 'France':
         container = "Select Department"
-    elif (selected_country == 'Australia' or selected_country == 'United Kingdom'):
+    #elif (selected_country == 'Australia' or selected_country == 'United Kingdom'):
+    elif selected_country == 'Australia':
         container = "Select Region"
     elif selected_country == 'Canada':
         container = "Select Province"
     else:
         container = "Select State"
 
-    if selected_year is None:
-        # PreventUpdate prevents ALL outputs updating
-        raise dash.exceptions.PreventUpdate
+    # if selected_year is None:
+    #     # PreventUpdate prevents ALL outputs updating
+    #     raise dash.exceptions.PreventUpdate
 
     grouped_df = df.loc[
         (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
@@ -341,34 +338,53 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                         '<b>Revenue</b>: %{y}')
     # opacity=0.6)
 
-    ### USA
-    usa = df.loc[(df["Country"] == "United States") & (df["Year"].isin(selected_year))]
+    return container, fig, table
 
-    usa = usa.groupby(['State', 'Product_Category'])
-    usa = pd.DataFrame(usa.sum().reset_index())
 
-    usa.drop(
-        usa.columns.difference(['Product_Category', 'Revenue', 'State']),
-        1, inplace=True)
+@app.callback(
+     Output(component_id='map', component_property='figure'),
+    [Input(component_id='slct_country', component_property='value')]
+)
+def update_my_map(selected_country):
+    data = df.loc[df["Country"] == selected_country]
 
-    usa = usa.pivot(index='State', columns='Product_Category', values='Revenue')
+    data = data.groupby(['State', 'Product_Category'])
+    data = pd.DataFrame(data.sum().reset_index())
 
-    usa = usa.fillna(0)
+    data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue']), 1, inplace=True)
 
-    usa.reset_index(level=0, inplace=True)
+    data = data.pivot(index='State', columns='Product_Category', values='Revenue')
 
-    usa['state_code'] = usa.apply(lambda row: label_code(row), axis=1)
+    data = data.fillna(0)
 
-    usa['Revenue'] = usa['Accessories'] + usa['Bikes'] + usa['Clothing']
+    data.reset_index(level=0, inplace=True)
 
-    for col in usa.columns:
-        usa[col] = usa[col].astype(str)
+    if selected_country == 'United States':
+        data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
 
-    usa['text'] = '<b>State</b>: ' + usa['State'] + '<br>' + \
-                      '<b>Accessories Rev</b>: $' + usa['Accessories'] + '<br>' + \
-                      '<b>Bikes Rev</b>: $' + usa['Bikes'] + '<br>' + \
-                      '<b>Clothing Rev</b>: $' + usa['Clothing'] + '<br>' + \
-                      '<b>Total Rev</b>: $' + usa['Revenue']
+    data['Revenue'] = data['Accessories'] + data['Bikes'] + data['Clothing']
+
+    if selected_country == 'Canada':
+        data.rename(columns={'State': 'name'}, inplace=True)
+    elif selected_country == 'Germany':
+        data.rename(columns={'State': 'NAME_1'}, inplace=True)
+    elif selected_country == 'France':
+        data.rename(columns={'State': 'nom'}, inplace=True)
+    elif selected_country == 'Australia':
+        data.rename(columns={'State': 'STATE_NAME'}, inplace=True)
+    else:
+        data.rename(columns={'State': 'State'}, inplace=True)
+
+    for col in data.columns:
+        data[col] = data[col].astype(str)
+
+    data['text'] = 'State: ' + data.iloc[:, 0] + '<br>' + \
+               'Accessories Rev: $' + data['Accessories'] + '<br>' + \
+               'Bikes Rev: $' + data['Bikes'] + '<br>' + \
+               'Clothing Rev: $' + data['Clothing'] + '<br>' + \
+               'Total Rev: $' + data['Revenue']
+
+    data['Revenue'] = data['Revenue'].apply(pd.to_numeric)
 
     if selected_country == "United States":
         my_map = go.Figure(
@@ -376,50 +392,63 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                 go.Choropleth(
                     colorbar=dict(title='Revenue', ticklen=3),
                     locationmode='USA-states',
-                    locations=usa['state_code'],
-                    z=usa["Revenue"],
+                    locations=data['state_code'],
+                    z=data["Revenue"],
                     colorscale='Reds',
-                    text=usa['text'],
-            ),
+                    text=data['text'],
+                ),
             ],
-            layout=dict(geo={'subunitcolor': 'black'})
+            layout=dict(geo={'subunitcolor': 'black'}, geo_scope='usa')
         )
 
-        my_map.update_layout(
-            title_text='USA map',
-            geo_scope='usa',
-            dragmode=False
-        )
-    elif selected_country == "Canada":
-        my_map = update_map(
-            selected_country='Canada',
-            country_url='https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson',
-            json_state='name',
-            scope='north america'
-        )
-    elif selected_country == "Germany":
-        my_map = update_map(
-            selected_country='Germany',
-            country_url='https://gist.githubusercontent.com/oscar6echo/4423770/raw/990e602cd47eeca87d31a3e25d2d633ed21e2005/dataBundesLander.json',
-            json_state='NAME_1',
-            scope='europe'
-        )
-    elif selected_country == "France":
-        my_map = update_map(
-            selected_country='France',
-            country_url='https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson',
-            json_state='nom',
-            scope='europe')
-    elif selected_country == "Australia":
-        my_map = update_map(
-            selected_country="Australia",
-            country_url='https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json',
-            json_state='STATE_NAME',
-            scope='world')
     else:
-        return None
+        if selected_country == 'Canada':
+            country_url='https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/canada.geojson'
+            json_state = 'name'
+            scope = 'north america'
+        elif selected_country == 'France':
+            country_url='https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'
+            json_state = 'nom'
+            scope = 'europe'
+        elif selected_country == 'Germany':
+            country_url='https://gist.githubusercontent.com/oscar6echo/4423770/raw/990e602cd47eeca87d31a3e25d2d633ed21e2005/dataBundesLander.json'
+            json_state = 'NAME_1'
+            scope = 'europe'
+        else:
+            country_url='https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json'
+            json_state = 'STATE_NAME'
+            scope = 'world'
 
-    return container, fig, table, my_map
+        json_data = requests.get(country_url).json()
+        tuple_feature_id = ('properties', json_state)
+
+        my_map = px.choropleth(
+            data_frame=data,
+            geojson=json_data,
+            locations=json_state,
+            featureidkey=".".join(tuple_feature_id),
+            color='Revenue',
+            hover_data=['text'],
+            color_continuous_scale='Magma',
+            scope=scope
+        )
+
+        my_map.update_geos(
+            visible=False,
+            showcountries=True,
+            showcoastlines=False,
+            showland=False,
+            fitbounds="locations",
+            showsubunits=True,
+            subunitcolor="Blue",
+            resolution=110
+        )
+
+    my_map.update_layout(dragmode=False)
+
+    my_map.show()
+
+    return my_map
 
 
 # Run the server
