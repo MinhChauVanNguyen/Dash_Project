@@ -149,7 +149,7 @@ def update_map(selected_country, json_state, scope, country_url):
 
 update_map(
     country_url='https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json',
-    selected_country="Australia",
+    selected_country="Australiaa",
     json_state='STATE_NAME',
     scope='world')
 
