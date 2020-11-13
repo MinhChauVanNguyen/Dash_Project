@@ -14,7 +14,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-import json
 import requests
 
 from helper_function import label_code
@@ -39,7 +38,8 @@ df.drop(
     df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
     1, inplace=True)
 
-df = df.sort_values(by="Year")
+
+df = df.sort_values(by=["Country", "Year"])
 
 year_list = df["Year"].unique().tolist()
 
@@ -67,7 +67,7 @@ def description_card():
             dcc.Dropdown(id="slct_country",
                          options=[{'label': c, 'value': c} for c in my_dict.keys()],
                          multi=False,
-                         value="United States",
+                         value="Canada",
                          clearable=False
                          ),
             html.Br(),
@@ -190,7 +190,6 @@ def set_states_value(country_options):
 def update_output(selected_country, selected_state, selected_group, selected_year):
     if selected_country == 'France':
         container = "Select Department"
-    #elif (selected_country == 'Australia' or selected_country == 'United Kingdom'):
     elif selected_country == 'Australia':
         container = "Select Region"
     elif selected_country == 'Canada':
@@ -215,11 +214,8 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
 
         grouped_df = grouped_df.sort_values(by='name_sort', ascending=True)
         grouped_df = grouped_df.drop('name_sort', axis=1)
-
     else:
         grouped_df = grouped_df
-
-    grouped_df = grouped_df
 
     # Table
     table = html.Div([
@@ -307,7 +303,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
             'Revenue': '<b>Revenue</b>',
             'Product_Category': '<b>Product category</b>'}
     )
-    #
+
     fig.update_layout(
         width=400,
         height=500,
@@ -384,22 +380,36 @@ def update_my_map(selected_country):
                'Clothing Rev: $' + data['Clothing'] + '<br>' + \
                'Total Rev: $' + data['Revenue']
 
-    data['Revenue'] = data['Revenue'].apply(pd.to_numeric)
+    #data['Revenue'] = data['Revenue'].apply(pd.to_numeric)
 
     if selected_country == "United States":
-        my_map = go.Figure(
-            data=[
-                go.Choropleth(
-                    colorbar=dict(title='Revenue', ticklen=3),
-                    locationmode='USA-states',
-                    locations=data['state_code'],
-                    z=data["Revenue"],
-                    colorscale='Reds',
-                    text=data['text'],
-                ),
-            ],
-            layout=dict(geo={'subunitcolor': 'black'}, geo_scope='usa')
+        my_map = px.choropleth(
+            data_frame=data,
+            locationmode='USA-states',
+            locations='state_code',
+            scope="usa",
+            color='Revenue',
+            hover_data=['text']
+            #template='plotly_dark'
         )
+        # my_map = go.Figure(
+        #     data=[
+        #         go.Choropleth(
+        #             #colorbar=dict(title='Revenue', ticklen=3),
+        #             locationmode='USA-states',
+        #             locations=data['state_code'],
+        #             z=data["Revenue"].astype(float),
+        #             colorscale='Reds',
+        #             text=data['text'],
+        #         ),
+        #     ],
+        #     layout=dict(geo={'subunitcolor': 'black'})
+        # )
+        #
+        # my_map.update_layout(
+        #     title_text='2011 US Agriculture Exports by State',
+        #     geo_scope='usa',
+        #     dragmode=False)
 
     else:
         if selected_country == 'Canada':
@@ -444,9 +454,7 @@ def update_my_map(selected_country):
             resolution=110
         )
 
-    my_map.update_layout(dragmode=False)
-
-    my_map.show()
+        my_map.update_layout(dragmode=False)
 
     return my_map
 
