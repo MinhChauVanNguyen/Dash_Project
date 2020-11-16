@@ -23,13 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="247c47a9-d936-42f4-98ed-d0eaa5884618" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/app2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medical supplies.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/usa_map.py" beforeDir="false" afterPath="$PROJECT_DIR$/usa_map.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,9 +161,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.app" />
-        <item itemvalue="Python.usa_map" />
-        <item itemvalue="Python.app2" />
         <item itemvalue="Python.map" />
+        <item itemvalue="Python.app2" />
+        <item itemvalue="Python.usa_map" />
         <item itemvalue="Python.helper_function" />
       </list>
     </recent_temporary>
@@ -202,22 +199,22 @@
       <screen x="0" y="23" width="1440" height="811" />
     </state>
     <state x="412" y="237" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.811@0.23.1440.811" timestamp="1605248891799" />
-    <state width="1419" height="234" key="GridCell.Tab.0.bottom" timestamp="1605251142034">
+    <state width="1419" height="362" key="GridCell.Tab.0.bottom" timestamp="1605569453625">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="234" key="GridCell.Tab.0.bottom/0.23.1440.811@0.23.1440.811" timestamp="1605251142034" />
-    <state width="1419" height="234" key="GridCell.Tab.0.center" timestamp="1605251142033">
+    <state width="1419" height="362" key="GridCell.Tab.0.bottom/0.23.1440.811@0.23.1440.811" timestamp="1605569453625" />
+    <state width="1419" height="362" key="GridCell.Tab.0.center" timestamp="1605569453623">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="234" key="GridCell.Tab.0.center/0.23.1440.811@0.23.1440.811" timestamp="1605251142033" />
-    <state width="1419" height="234" key="GridCell.Tab.0.left" timestamp="1605251142033">
+    <state width="1419" height="362" key="GridCell.Tab.0.center/0.23.1440.811@0.23.1440.811" timestamp="1605569453623" />
+    <state width="1419" height="362" key="GridCell.Tab.0.left" timestamp="1605569453622">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="234" key="GridCell.Tab.0.left/0.23.1440.811@0.23.1440.811" timestamp="1605251142033" />
-    <state width="1419" height="234" key="GridCell.Tab.0.right" timestamp="1605251142034">
+    <state width="1419" height="362" key="GridCell.Tab.0.left/0.23.1440.811@0.23.1440.811" timestamp="1605569453622" />
+    <state width="1419" height="362" key="GridCell.Tab.0.right" timestamp="1605569453624">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="234" key="GridCell.Tab.0.right/0.23.1440.811@0.23.1440.811" timestamp="1605251142034" />
+    <state width="1419" height="362" key="GridCell.Tab.0.right/0.23.1440.811@0.23.1440.811" timestamp="1605569453624" />
     <state width="1419" height="259" key="GridCell.Tab.1.bottom" timestamp="1604714712431">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
