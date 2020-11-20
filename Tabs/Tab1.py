@@ -1,15 +1,15 @@
 import pandas as pd
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 import dash_table as dt
 from dash.dependencies import Input, Output
 import plotly.express as px
 import requests
+
 from app import app
 from Data.helper_function import label_code
 from Data import data_processing
-import dash_bootstrap_components as dbc
-
 
 df = data_processing.df
 
@@ -42,8 +42,7 @@ layout = html.Div(children=[
 
 # callbacks for outputs
 @app.callback(
-    [Output(component_id='state_label', component_property='children'),
-     Output(component_id='bar_graph', component_property='figure'),
+    [Output(component_id='bar_graph', component_property='figure'),
      Output(component_id='data_table', component_property='children')
      ],
     [Input(component_id='slct_country', component_property='value'),
@@ -53,15 +52,6 @@ layout = html.Div(children=[
      ]
 )
 def update_output(selected_country, selected_state, selected_group, selected_year):
-    if selected_country == 'France':
-        container = "Select Department"
-    elif selected_country == 'Australia':
-        container = "Select Region"
-    elif selected_country == 'Canada':
-        container = "Select Province"
-    else:
-        container = "Select State"
-
     grouped_df = df.loc[
         (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
 
@@ -103,8 +93,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                 'minWidth': '10%',
             },
             editable=True,
-            style_header={'backgroundColor': 'rgb(30, 30, 30)',
-                          'color': 'white'},
+            style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
             style_data={'whiteSpace': 'auto', 'height': 'auto', 'width': 'auto'},
             style_cell={'textAlign': 'left'},
             style_data_conditional=([
@@ -159,7 +148,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
         data_frame=grouped_df,
         y='Revenue',
         x=selected_group,
-        #orientation="h",
+        # orientation="h",
         color='Product_Category',
         text='Perc',
         category_orders={"Product_Category": ["Clothing", "Bikes", "Accessories"]},
@@ -205,12 +194,13 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
     )
     # opacity=0.6)
 
-    return container, fig, table
+    return fig, table
 
 
 @app.callback(
     Output(component_id='map', component_property='figure'),
-    [Input(component_id='slct_country', component_property='value'),
+    [#Input(component_id='state_label', component_property='options'),
+     Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_year', component_property='value'),
      Input(component_id='slct_group', component_property='value'),
      Input(component_id='slct_subgrp', component_property='value')
@@ -226,20 +216,16 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     else:
         container = "Select State"
 
-    # container = update_output()[0]
     container = container.split(' ')[1]
 
     data = df.loc[(df["Country"] == selected_country) & (df["Year"].isin(selected_year))]
 
     data = data.groupby(['State', selected_group, 'Product_Category'])
     data = pd.DataFrame(data.sum().reset_index())
-
     data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue', selected_group]), 1, inplace=True)
 
     data = data.pivot(index=['State', selected_group], columns=['Product_Category'], values='Revenue')
-
     data = data.fillna(0)
-
     data.reset_index(level=['State', selected_group], inplace=True)
 
     data = data[data[selected_group] == selected_subgroup]
@@ -248,19 +234,14 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
         data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
 
     data['Accessories2'] = data['Accessories'].groupby(data['State']).transform('sum')
-
     data['Bikes2'] = data['Bikes'].groupby(data['State']).transform('sum')
-
     data['Clothing2'] = data['Clothing'].groupby(data['State']).transform('sum')
-
     data['Revenue'] = data['Accessories2'] + data['Bikes2'] + data['Clothing2']
 
     data.rename(columns={'State': 'id'}, inplace=True)
 
     data = data.sort_values(by=['Revenue'], ascending=False)
-
     data['Revenue'] = data['Revenue'].map('${:,.0f}'.format)
-
     data['Revenue'] = data['Revenue'].astype(str)
 
     if selected_country == "United States":

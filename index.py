@@ -20,6 +20,5 @@ def render_content(tab):
         return Tab2.layout
 
 
-
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -24,7 +24,7 @@ df = df.replace({'State': {
 )
 # subset data based on the following columns
 df.drop(
-    df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
+    df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year', 'Profit']),
     1, inplace=True)
 
 # sort data from the least to most recent year
@@ -34,4 +34,3 @@ df = df.sort_values(by=["Country", "Year"])
 df['Customer_Gender'] = df['Customer_Gender'].replace({'F': 'Female', 'M': 'Male'})
 
 df = df
-

@@ -1,22 +1,18 @@
 import pandas as pd
-import requests
+import sklearn
 
 df = pd.read_csv(
     'https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
 
 df.drop(
-    df.columns.difference(['Customer_Gender',  'Product_Category', 'Revenue', 'State', 'Country', 'Year']),
+    df.columns.difference(['Customer_Gender', 'Revenue', 'State', 'Country', 'Year']),
     1, inplace=True)
 
-data = df.loc[(df["Country"] == "France")]
+data = df.loc[(df["Country"] == "France") & (df["State"] == "Seine Saint Denis")]
 
-data = data.groupby(['State', 'Customer_Gender', 'Product_Category']).agg({'Revenue': 'sum'})
-#data = pd.DataFrame(data.sum().reset_index())
+# 2016 data
+data_2016 = data[data["Year"] == 2016]
 
-state_pcts = data.groupby(level=0).apply(lambda x: 100 * x / float(x.sum()))
-
-data['Perc'] = state_pcts
-
-data.reset_index(inplace=True)
+data = data.set_index("Year").drop(2016, axis=0)
 
 print(data)
