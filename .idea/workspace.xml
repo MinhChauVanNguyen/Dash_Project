@@ -24,13 +24,9 @@
   <component name="ChangeListManager">
     <list default="true" id="247c47a9-d936-42f4-98ed-d0eaa5884618" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Data/data_processing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tabs/Sidebar.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tabs/Sidebar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tabs/Tab1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tabs/Tab1.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tabs/Tab2.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tabs/Tab2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/index.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hello.py" beforeDir="false" afterPath="$PROJECT_DIR$/hello.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +101,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="helper_function" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="hello" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Dash_Project" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -117,7 +113,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Data/helper_function.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/hello.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -192,10 +188,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.index" />
+        <item itemvalue="Python.hello" />
         <item itemvalue="Python.map" />
         <item itemvalue="Python.app2" />
         <item itemvalue="Python.app2" />
-        <item itemvalue="Python.usa_map" />
       </list>
     </recent_temporary>
   </component>
@@ -230,22 +226,22 @@
       <screen x="0" y="23" width="1440" height="811" />
     </state>
     <state x="412" y="237" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.811@0.23.1440.811" timestamp="1605643927471" />
-    <state width="1419" height="362" key="GridCell.Tab.0.bottom" timestamp="1605843768502">
+    <state width="1419" height="362" key="GridCell.Tab.0.bottom" timestamp="1605857701770">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="362" key="GridCell.Tab.0.bottom/0.23.1440.811@0.23.1440.811" timestamp="1605843768502" />
-    <state width="1419" height="362" key="GridCell.Tab.0.center" timestamp="1605843768501">
+    <state width="1419" height="362" key="GridCell.Tab.0.bottom/0.23.1440.811@0.23.1440.811" timestamp="1605857701770" />
+    <state width="1419" height="362" key="GridCell.Tab.0.center" timestamp="1605857701769">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="362" key="GridCell.Tab.0.center/0.23.1440.811@0.23.1440.811" timestamp="1605843768501" />
-    <state width="1419" height="362" key="GridCell.Tab.0.left" timestamp="1605843768501">
+    <state width="1419" height="362" key="GridCell.Tab.0.center/0.23.1440.811@0.23.1440.811" timestamp="1605857701769" />
+    <state width="1419" height="362" key="GridCell.Tab.0.left" timestamp="1605857701768">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="362" key="GridCell.Tab.0.left/0.23.1440.811@0.23.1440.811" timestamp="1605843768501" />
-    <state width="1419" height="362" key="GridCell.Tab.0.right" timestamp="1605843768502">
+    <state width="1419" height="362" key="GridCell.Tab.0.left/0.23.1440.811@0.23.1440.811" timestamp="1605857701768" />
+    <state width="1419" height="362" key="GridCell.Tab.0.right" timestamp="1605857701770">
       <screen x="0" y="23" width="1440" height="811" />
     </state>
-    <state width="1419" height="362" key="GridCell.Tab.0.right/0.23.1440.811@0.23.1440.811" timestamp="1605843768502" />
+    <state width="1419" height="362" key="GridCell.Tab.0.right/0.23.1440.811@0.23.1440.811" timestamp="1605857701770" />
     <state width="1419" height="259" key="GridCell.Tab.1.bottom" timestamp="1604714712431">
       <screen x="0" y="23" width="1440" height="811" />
     </state>

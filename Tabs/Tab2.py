@@ -55,25 +55,30 @@ layout = html.Div(
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
-     Input(component_id='slct_group', component_property='value'),
+     Input(component_id='slct_variable', component_property='value'),
      Input(component_id='slct_model', component_property='value')
      ]
 )
-def output_predict(selected_country, selected_state, selected_group, selected_model):
+def output_predict(selected_country, selected_state, selected_variable, selected_model):
     data = df.loc[(df["Country"] == selected_country) & (df["State"] == selected_state)]
     data.drop(
-        data.columns.difference([selected_group, 'Revenue', 'State', 'Profit', 'Country', 'Year']),
+        data.columns.difference([','.join(selected_variable), 'Revenue', 'State', 'Country']),
         1, inplace=True)
 
-    data = data.groupby(['Year', selected_group]).agg('sum')
+    print(data)
+    x
+    data = data.groupby(selected_variable).agg('sum')
     data.reset_index(inplace=True)
+
+    if selected_variable == "Year" or selected_variable == "Age_Group" or selected_variable == "Customer_Gender":
+        data[[selected_variable]] = LabelEncoder().fit_transform(data[[selected_variable]].values.ravel())
 
     X = data.iloc[:, :-1].values
     y = data.iloc[:, -1].values
 
     # Encode categorical variables
-    X[:, 0] = LabelEncoder().fit_transform(X[:, 0])  # year
-    X[:, 1] = LabelEncoder().fit_transform(X[:, 1])  # selected_group
+    # X[:, 0] = LabelEncoder().fit_transform(X[:, 0])  # year
+    # X[:, 1] = LabelEncoder().fit_transform(X[:, 1])  # selected_group
 
     # Split the data into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -126,7 +131,7 @@ def output_predict(selected_country, selected_state, selected_group, selected_mo
     else:
         my_list = html.P([
             html.Strong("Feature"), ": Year, ", html.Strong("Score"), ": {}".format(importance[0]), html.Br(),
-            html.Strong("Feature"), ": {}, ".format(selected_group), html.Strong("Score"), ": {}".format(importance[1]), html.Br(),
+            html.Strong("Feature"), ": {}, ".format(selected_variable), html.Strong("Score"), ": {}".format(importance[1]), html.Br(),
             html.Strong("Feature"), ": Profit, ", html.Strong("Score"), ": {}".format(importance[2]), html.Br()
         ])
 

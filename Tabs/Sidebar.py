@@ -67,26 +67,45 @@ layout = html.Div(children=[
                     style={'display': 'inline-block'}
                 ),
                 html.Br(),
-                html.P("Select Group"),
-                dcc.Dropdown(
-                    id='slct_group',
-                    options=[
-                        {'label': "Age group", 'value': "Age_Group"},
-                        {'label': "Gender", 'value': "Customer_Gender"},
-                    ],
-                    value='Age_Group',
-                    clearable=False),
-                html.Br(),
                 html.Div(
-                    id='subgrp_label',
-                    children=[
-                        html.P(html.Strong("Select Sub group")),
-                        dcc.RadioItems(
-                            id='slct_subgrp',
-                            inputStyle={"margin-right": "10px"}
-                        )
+                 id='subgrp_label',
+                 children=[
+                     html.P("Select Group"),
+                     dcc.Dropdown(
+                        id='slct_group',
+                        options=[
+                            {'label': "Age group", 'value': "Age_Group"},
+                            {'label': "Gender", 'value': "Customer_Gender"},
+                        ],
+                        value='Age_Group',
+                        clearable=False),
+                     html.Br(),
+                     html.P(html.Strong("Select Sub group")),
+                     dcc.RadioItems(
+                        id='slct_subgrp',
+                        inputStyle={"margin-right": "10px"}
+                     )
                     ],
                     style={'display': 'block'}
+                ),
+                html.Div(
+                    id = 'variable',
+                    children=[
+                        html.P(html.Strong("Select Independent Variable")),
+                        dcc.Dropdown(
+                            id='slct_variable',
+                            options=[
+                                {'label': "Age group", 'value': "Age_Group"},
+                                {'label': "Gender", 'value': "Customer_Gender"},
+                                {'label': "Year", 'value': "Year"},
+                                {'label': "Profit", 'value': "Profit"}
+                            ],
+                            value=['Age_Group', 'Customer_Gender', 'Year', 'Profit'],
+                            clearable=False,
+                            multi=True
+                        )
+                    ],
+                    style={'display': 'inline-block'}
                 ),
                 html.Div(
                     id="Model_elements",
@@ -182,10 +201,11 @@ def show_hide_element(tab):
 
 @app.callback(
     Output(component_id='Model_elements', component_property='style'),
+    Output(component_id='variable', component_property='style'),
     [Input(component_id='tabs', component_property='value')])
 def show_hide_element(tab):
     if tab == 'tab-2':
-        return {'display': 'block'}
+        return {'display': 'block'}, {'display': 'inline-block'}
     if tab == 'tab-1':
-        return {'display': 'none'}
+        return {'display': 'none'}, {'display': 'none'}
 
