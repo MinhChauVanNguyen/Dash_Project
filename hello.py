@@ -1,15 +1,29 @@
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 df = pd.read_csv(
     'https://raw.githubusercontent.com/ine-rmotr-curriculum/FreeCodeCamp-Pandas-Real-Life-Example/master/data/sales_data.csv')
 
-df.drop(
-    df.columns.difference(['Customer_Gender', 'Age_Group', 'Product_Category', 'Revenue', 'State', 'Country', 'Year', 'Profit']),
-    1, inplace=True)
 
-value = ['Age_Group', 'Customer_Gender', 'Year', 'Profit']
+data = df.loc[(df["Country"] == "France") & (df["Year"].isin(['2011', '2012', '2013', '2014']))]
 
-data = df.groupby(value).agg('sum')
+data = data.groupby(['State', 'Age_Group', 'Product_Category'])
+data = pd.DataFrame(data.sum().reset_index())
+data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue', 'Age_Group']), 1, inplace=True)
 
-#str1 = ','.join('"{0}"'.format(w) for w in value)
-#print(str1)
+data = data.pivot(index=['State', 'Age_Group'], columns=['Product_Category'], values='Revenue')
+data = data.fillna(0)
+
+data.reset_index(level=['State', 'Age_Group'], inplace=True)
+
+data = data[data['Age_Group'] == 'Adults (35-64)']
+
+for c in data:
+    if type(data[c]) != 'object':
+        data['Revenue'] = data.sum(axis=1)
+
+
+try:
+    selected_year is None
+except ValueError:
+    print("Please select at least a year")

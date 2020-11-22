@@ -66,11 +66,11 @@ layout = html.Div(children=[
                     ],
                     style={'display': 'inline-block'}
                 ),
-                html.Br(),
                 html.Div(
                  id='subgrp_label',
                  children=[
-                     html.P("Select Group"),
+                     html.Br(),
+                     html.P(html.Strong("Select Group")),
                      dcc.Dropdown(
                         id='slct_group',
                         options=[
@@ -95,15 +95,16 @@ layout = html.Div(children=[
                         dcc.Dropdown(
                             id='slct_variable',
                             options=[
+                                {'label': "Year", 'value': "Year"},
                                 {'label': "Age group", 'value': "Age_Group"},
                                 {'label': "Gender", 'value': "Customer_Gender"},
-                                {'label': "Year", 'value': "Year"},
                                 {'label': "Profit", 'value': "Profit"}
                             ],
-                            value=['Age_Group', 'Customer_Gender', 'Year', 'Profit'],
+                            value=['Year', 'Age_Group', 'Customer_Gender', 'Profit'],
                             clearable=False,
                             multi=True
-                        )
+                        ),
+                        html.Br()
                     ],
                     style={'display': 'inline-block'}
                 ),

@@ -61,24 +61,33 @@ layout = html.Div(
 )
 def output_predict(selected_country, selected_state, selected_variable, selected_model):
     data = df.loc[(df["Country"] == selected_country) & (df["State"] == selected_state)]
-    data.drop(
-        data.columns.difference([','.join(selected_variable), 'Revenue', 'State', 'Country']),
-        1, inplace=True)
 
-    print(data)
-    x
-    data = data.groupby(selected_variable).agg('sum')
+    # add Revenue
+    selected_variable.append('Revenue')
+
+    data = data[selected_variable]
+
+    # remove Revenue
+    selected_variable.pop()
+
+    ind_variable = selected_variable.copy()
+
+    try:
+        ind_variable = selected_variable.copy()
+        ind_variable.remove("Profit")
+    except ValueError:
+        pass
+    finally:
+        data = data.groupby(ind_variable).agg('sum')
+
     data.reset_index(inplace=True)
 
-    if selected_variable == "Year" or selected_variable == "Age_Group" or selected_variable == "Customer_Gender":
-        data[[selected_variable]] = LabelEncoder().fit_transform(data[[selected_variable]].values.ravel())
+    for i in range(len(selected_variable)):
+        if selected_variable[i] != "Profit":
+            data[selected_variable[i]] = LabelEncoder().fit_transform(data[selected_variable[i]].values)
 
     X = data.iloc[:, :-1].values
     y = data.iloc[:, -1].values
-
-    # Encode categorical variables
-    # X[:, 0] = LabelEncoder().fit_transform(X[:, 0])  # year
-    # X[:, 1] = LabelEncoder().fit_transform(X[:, 1])  # selected_group
 
     # Split the data into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -103,9 +112,6 @@ def output_predict(selected_country, selected_state, selected_variable, selected
         regressor.fit(X_train, y_train)
         y_pred = regressor.predict(X_test)
 
-    print(y_test.tolist())
-    print(y_pred.tolist())
-
     y_pred_df = pd.DataFrame(y_pred, columns=['Y predict'])
     y_test_df = pd.DataFrame(y_test, columns=['Y test'])
     frames = [y_pred_df, y_test_df]
@@ -126,13 +132,17 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     else:
         importance = my_list
 
+    feat_imp = pd.DataFrame({
+        'cols': [x for x in selected_variable],
+        'imps': importance
+    })
+
+    print(feat_imp)
+
     if selected_model == "SVM":
         my_list = "Feature Importance is not available for non-linear kernel"
     else:
-        my_list = html.P([
-            html.Strong("Feature"), ": Year, ", html.Strong("Score"), ": {}".format(importance[0]), html.Br(),
-            html.Strong("Feature"), ": {}, ".format(selected_variable), html.Strong("Score"), ": {}".format(importance[1]), html.Br(),
-            html.Strong("Feature"), ": Profit, ", html.Strong("Score"), ": {}".format(importance[2]), html.Br()
-        ])
+        for i, v in enumerate(importance):
+            my_list.append('Feature: %0d, Score: %.5f' % (i, v))
 
     return data, columns, my_list, r2_score(y_test.tolist(), y_pred.tolist())

@@ -53,7 +53,14 @@ layout = html.Div(children=[
 )
 def update_output(selected_country, selected_state, selected_group, selected_year):
     grouped_df = df.loc[
-        (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
+        (df["Country"] == selected_country) & (df["State"] == selected_state)]
+
+    try:
+        grouped_df = grouped_df[(grouped_df["Year"].isin(selected_year))]
+        if grouped_df.empty:
+            raise Exception("Data is empty")
+    except Exception:
+        print("Data is empty")
 
     grouped_df = grouped_df.groupby(['State', selected_group, 'Product_Category']).agg({'Revenue': 'sum'})
 
@@ -199,8 +206,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
 
 @app.callback(
     Output(component_id='map', component_property='figure'),
-    [#Input(component_id='state_label', component_property='options'),
-     Input(component_id='slct_country', component_property='value'),
+    [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_year', component_property='value'),
      Input(component_id='slct_group', component_property='value'),
      Input(component_id='slct_subgrp', component_property='value')
@@ -230,13 +236,9 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
 
     data = data[data[selected_group] == selected_subgroup]
 
-    if selected_country == 'United States':
-        data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
-
-    data['Accessories2'] = data['Accessories'].groupby(data['State']).transform('sum')
-    data['Bikes2'] = data['Bikes'].groupby(data['State']).transform('sum')
-    data['Clothing2'] = data['Clothing'].groupby(data['State']).transform('sum')
-    data['Revenue'] = data['Accessories2'] + data['Bikes2'] + data['Clothing2']
+    for c in data:
+        if type(data[c]) != 'object':
+            data['Revenue'] = data.sum(axis=1)
 
     data.rename(columns={'State': 'id'}, inplace=True)
 
@@ -244,7 +246,14 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     data['Revenue'] = data['Revenue'].map('${:,.0f}'.format)
     data['Revenue'] = data['Revenue'].astype(str)
 
+    data2 = data.copy()
+
+    hover_data = {}
+    for c in data2.columns[2:-1]:
+        hover_data[c] = ':$,.0f'
+
     if selected_country == "United States":
+        data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
         my_map = px.choropleth(
             data_frame=data,
             locationmode='USA-states',
@@ -253,15 +262,8 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             color='Revenue',
             hover_name="id",
             hover_data={'id': False,
-                        'state_code': False,
-                        'Accessories2': ':$,.0f',
-                        'Bikes2': ':$,.0f',
-                        'Clothing2': ':$,.0f'},
-            labels={'Revenue': 'Total Revenue',
-                    'Accessories2': 'Accessories',
-                    'Bikes2': 'Bikes',
-                    'Clothing2': 'Clothing'
-                    },
+                        'state_code': False},
+            labels={'Revenue': 'Total Revenue'},
             title='<b>USA map</b>'
             # template='plotly_dark'
         )
@@ -310,19 +312,9 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             geojson=json_data,
             locations='id',
             featureidkey='properties.id',
-            color='id' if selected_country == 'France' else 'Revenue',
-            hover_data={
-                'Accessories2': ':$,.0f',
-                'Bikes2': ':$,.0f',
-                'Clothing2': ':$,.0f',
-                'Revenue': True},
-            labels={
-                'Revenue': 'Total Revenue',
-                'id': container,
-                'Accessories2': 'Accessories',
-                'Bikes2': 'Bikes',
-                'Clothing2': 'Clothing'
-            },
+            color='Revenue',
+            hover_data=hover_data,
+            labels={'Revenue': 'Total Revenue', 'id': container},
             color_continuous_scale='Magma',
             scope=scope,
             title='<b>' + " ".join(map_title) + '</b>',
