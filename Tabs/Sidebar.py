@@ -88,6 +88,13 @@ layout = html.Div(children=[
                     ],
                     style={'display': 'block'}
                 ),
+                html.Br(),
+                html.Div(
+                    children=[
+                        html.Span(u'\u25A2', style={'color': 'blue', 'backgroundColor': 'blue'}),
+                        html.P("Hello", style={'display': 'inline-block'})
+                    ]
+                ),
                 html.Div(
                     id = 'variable',
                     children=[

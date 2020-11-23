@@ -31,34 +31,35 @@ layout = html.Div(children=[
     html.Div(
         id="bike_volume_card",
         children=[
-            dbc.Row(dcc.RadioItems(
-                id='slct_output',
-                options=[
-                    {'label': "Graph", 'value': "Graph"},
-                    {'label': "Table", 'value': "Table"},
-                ],
-                value='Graph',
-                labelStyle={'display': 'inline-block'}
-            )),
-            dbc.Row(children=[
+            dbc.Row(
+              children=[
+                html.Div("Switch between graph and table outputs", style={'display': 'inline-block'}),
+                dcc.RadioItems(
+                    id='slct_output',
+                    options=[
+                        {'label': "Graph", 'value': "Graph"},
+                        {'label': "Table", 'value': "Table"},
+                    ],
+                    value='Graph',
+                    labelStyle={'display': 'inline-block'}
+              )]
+            ),
+            dbc.Row(
                 dbc.Col(
                     children=[
-                        dcc.Graph(
-                            id="scatter",
+                        html.Div(id="scatter_id", children=[dcc.Graph(id="scatter")], style={'display':'block'}),
+                        html.Div(
+                            id="table_id",
+                            children=[dt.DataTable(
+                                    id='table_two',
+                                    style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
+                                    style_cell={'textAlign': 'center'}
+                            )],
+                            style={'display': 'block'}
                         )
-                    ]),
-                dbc.Col([
-                    html.Div(
-                        id="my_dt",
-                        children=[dt.DataTable(
-                            id='table_two',
-                            style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
-                            style_cell={'textAlign': 'center'}
-                        )],
-                        style={'display': 'none'}
-                    )
-                ])
-            ])
+                    ]
+                  )
+            )
         ]
     ),
     html.Div(
@@ -87,6 +88,8 @@ layout = html.Div(children=[
 @app.callback(
     [Output(component_id='heatmap', component_property='figure'),
      Output(component_id='scatter', component_property='figure'),
+     # Output(component_id='table_two', component_property='data'),
+     # Output(component_id='table_two', component_property='columns'),
      Output(component_id='feature_imp', component_property='figure'),
      Output(component_id='r2', component_property='children')
      ],
@@ -173,6 +176,8 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     frames = [y_pred_df, y_test_df]
     results = pd.concat(frames, axis=1)
 
+    results2 = results.copy()
+
     results['Y_pred'] = results['Y predict'].map('{:,.0f}'.format)
     results['Y_test'] = results['Y test'].map('{:,}'.format)
 
@@ -204,10 +209,11 @@ def output_predict(selected_country, selected_state, selected_variable, selected
         annotations=annotations
     )
 
-    # columns = [{'name': col, 'id': col} for col in results.columns]
-    # data = results.to_dict(orient='records')
-
-    # my_list = []
+    # results2['Y predict'] = results2['Y predict'].map('{:,.0f}'.format)
+    # results2['Y test'] = results2['Y test'].map('{:,}'.format)
+    #
+    # columns = [{'name': col, 'id': col} for col in results2.columns]
+    # data = results2.to_dict(orient='records')
 
     if selected_model == "Linear":
         importance = [round(num, 3) for num in regressor.coef_]
@@ -254,15 +260,16 @@ def output_predict(selected_country, selected_state, selected_variable, selected
 
 
 @app.callback(
-    [Output(component_id='my_dt', component_property='style'),
+    [Output(component_id='scatter_id', component_property='style'),
+     Output(component_id='table_id', component_property='style'),
      Output(component_id='table_two', component_property='data'),
-     Output(component_id='table_two', component_property='columns')
+     Output(component_id='table_two', component_property='columns'),
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
      Input(component_id='slct_variable', component_property='value'),
      Input(component_id='slct_model', component_property='value'),
-     Input(component_id='slct_model', component_property='value')
+     Input(component_id='slct_output', component_property='value')
      ]
 )
 def show_table(selected_country, selected_state, selected_variable, selected_model, button):
@@ -329,7 +336,8 @@ def show_table(selected_country, selected_state, selected_variable, selected_mod
 
     columns = [{'name': col, 'id': col} for col in results.columns]
     data = results.to_dict(orient='records')
+
     if button == 'Table':
-        return {'display': 'block'}, data, columns
+        return {'display': 'none'}, {'display': 'block'}, data, columns
     if button == 'Graph':
-        return {'display': 'none'}, data, columns
+        return {'display': 'block'}, {'display': 'none'}, data, columns

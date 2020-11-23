@@ -1,3 +1,7 @@
+#submit-val .button{
+ width: 5% !important;
+}
+
 .modebar{
     display: none !important;
 }
