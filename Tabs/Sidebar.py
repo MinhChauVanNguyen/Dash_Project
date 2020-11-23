@@ -91,6 +91,7 @@ layout = html.Div(children=[
                 html.Div(
                     id = 'variable',
                     children=[
+                        html.Br(),
                         html.P(html.Strong("Select Independent Variable")),
                         dcc.Dropdown(
                             id='slct_variable',
