@@ -10,20 +10,23 @@ import plotly.figure_factory as ff
 import numpy as np
 import pandas as pd
 
+from app import app
+
+from Data.regression_function import update_data
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-
+from sklearn.svm import SVR
 from sklearn.metrics import r2_score, mean_squared_error
 
-from app import app
 from Data import data_processing
 
 df = data_processing.df
+
+
 np.set_printoptions(precision=2)
 pd.options.mode.chained_assignment = None
 
@@ -33,7 +36,9 @@ layout = html.Div(children=[
         children=[
             dbc.Row(
               children=[
-                html.Div("Switch between graph and table outputs", style={'display': 'inline-block'}),
+                html.Div(
+                    "Switch between graph and table outputs",
+                    style={'display': 'inline-block', 'marginRight': 10}),
                 dcc.RadioItems(
                     id='slct_output',
                     options=[
@@ -86,20 +91,23 @@ layout = html.Div(children=[
 
 
 @app.callback(
-    [Output(component_id='heatmap', component_property='figure'),
+    [Output(component_id='scatter_id', component_property='style'),
+     Output(component_id='table_id', component_property='style'),
+     Output(component_id='heatmap', component_property='figure'),
      Output(component_id='scatter', component_property='figure'),
-     # Output(component_id='table_two', component_property='data'),
-     # Output(component_id='table_two', component_property='columns'),
+     Output(component_id='table_two', component_property='data'),
+     Output(component_id='table_two', component_property='columns'),
      Output(component_id='feature_imp', component_property='figure'),
      Output(component_id='r2', component_property='children')
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
      Input(component_id='slct_variable', component_property='value'),
-     Input(component_id='slct_model', component_property='value')
+     Input(component_id='slct_model', component_property='value'),
+     Input(component_id='slct_output', component_property='value')
      ]
 )
-def output_predict(selected_country, selected_state, selected_variable, selected_model):
+def output_predict(selected_country, selected_state, selected_variable, selected_model, selected_radio):
     data = df.loc[(df["Country"] == selected_country) & (df["State"] == selected_state)]
 
     # add Revenue
@@ -122,7 +130,7 @@ def output_predict(selected_country, selected_state, selected_variable, selected
 
     data.reset_index(inplace=True)
 
-    ### HEATMAP
+    # HEATMAP
     heatmap_data = data.copy()
     heatmap_data = heatmap_data.apply(
         lambda x: pd.factorize(x)[0] if x.name in ['Age_Group', 'Customer_Gender', 'Year'] else x).corr(
@@ -140,7 +148,7 @@ def output_predict(selected_country, selected_state, selected_variable, selected
 
     heatmap.update_traces(dict(showscale=False))
 
-    ### REGRESSION MODEL
+    ## REGRESSION MODEL
     for i in range(len(selected_variable)):
         if selected_variable[i] != "Profit":
             data[selected_variable[i]] = LabelEncoder().fit_transform(data[selected_variable[i]].values)
@@ -176,8 +184,9 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     frames = [y_pred_df, y_test_df]
     results = pd.concat(frames, axis=1)
 
-    results2 = results.copy()
+    results_table = results.copy()
 
+    # SCATTER PLOT
     results['Y_pred'] = results['Y predict'].map('{:,.0f}'.format)
     results['Y_test'] = results['Y test'].map('{:,}'.format)
 
@@ -203,18 +212,20 @@ def output_predict(selected_country, selected_state, selected_variable, selected
                  )
         )
 
-    fig = px.scatter(results, x="Y test", y="Y predict")
+    scatter_plt = px.scatter(results, x="Y test", y="Y predict")
 
-    fig.update_layout(
+    scatter_plt.update_layout(
         annotations=annotations
     )
 
-    # results2['Y predict'] = results2['Y predict'].map('{:,.0f}'.format)
-    # results2['Y test'] = results2['Y test'].map('{:,}'.format)
-    #
-    # columns = [{'name': col, 'id': col} for col in results2.columns]
-    # data = results2.to_dict(orient='records')
+    # TABLE
+    results_table['Y predict'] = results_table['Y predict'].map('{:,.0f}'.format)
+    results_table['Y test'] = results_table['Y test'].map('{:,}'.format)
 
+    columns = [{'name': col, 'id': col} for col in results_table.columns]
+    data = results_table.to_dict(orient='records')
+
+    # FEATURE IMPORTANCE
     if selected_model == "Linear":
         importance = [round(num, 3) for num in regressor.coef_]
     elif selected_model == "Poly":
@@ -248,6 +259,7 @@ def output_predict(selected_country, selected_state, selected_variable, selected
                           tickvals=selected_variable
                           )
 
+    # R^2 AND ADJUSTED R^2
     r2 = r2_score(y_test.tolist(), y_pred.tolist())
     adj_r2 = (1 - (1 - r2) * ((X_train.shape[0] - 1) /
                               (X_train.shape[0] - X_train.shape[1] - 1)))
@@ -256,88 +268,10 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     # mse = mean_squared_error(y_test.tolist(), y_pred.tolist(), squared=False)
     # rmse = mean_squared_error(y_test.tolist(), y_pred.tolist(), squared=False)
 
-    return heatmap, fig, plot_imp, metrics
+    if selected_radio == 'Table':
+        return {'display': 'none'}, {'display': 'block'}, heatmap, scatter_plt, data, columns, plot_imp, metrics
+    if selected_radio == 'Graph':
+        return {'display': 'block'}, {'display': 'none'}, heatmap, scatter_plt, data, columns, plot_imp, metrics
 
 
-@app.callback(
-    [Output(component_id='scatter_id', component_property='style'),
-     Output(component_id='table_id', component_property='style'),
-     Output(component_id='table_two', component_property='data'),
-     Output(component_id='table_two', component_property='columns'),
-     ],
-    [Input(component_id='slct_country', component_property='value'),
-     Input(component_id='slct_state', component_property='value'),
-     Input(component_id='slct_variable', component_property='value'),
-     Input(component_id='slct_model', component_property='value'),
-     Input(component_id='slct_output', component_property='value')
-     ]
-)
-def show_table(selected_country, selected_state, selected_variable, selected_model, button):
-    data = df.loc[(df["Country"] == selected_country) & (df["State"] == selected_state)]
 
-    # add Revenue
-    selected_variable.append('Revenue')
-
-    data = data[selected_variable]
-
-    # remove Revenue
-    selected_variable.pop()
-
-    ind_variable = selected_variable.copy()
-
-    try:
-        ind_variable = selected_variable.copy()
-        ind_variable.remove("Profit")
-    except ValueError:
-        pass
-    finally:
-        data = data.groupby(ind_variable).agg('sum')
-
-    data.reset_index(inplace=True)
-
-    ### REGRESSION MODEL
-    for i in range(len(selected_variable)):
-        if selected_variable[i] != "Profit":
-            data[selected_variable[i]] = LabelEncoder().fit_transform(data[selected_variable[i]].values)
-
-    X = data.iloc[:, :-1].values
-    y = data.iloc[:, -1].values
-
-    # Split the data into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-
-    # Fit the model on the train set
-    poly_reg = PolynomialFeatures(degree=2)
-    X_train_poly = poly_reg.fit_transform(X_train)
-
-    if selected_model == "SVM":
-        regressor = SVR(kernel='linear', gamma=1e-8)
-    elif selected_model == "Decision":
-        regressor = DecisionTreeRegressor(random_state=0)
-    elif selected_model == "Random":
-        regressor = RandomForestRegressor(n_estimators=10, random_state=0)
-    else:
-        regressor = LinearRegression()
-
-    if selected_model == "Poly":
-        regressor.fit(X_train_poly, y_train)
-        y_pred = regressor.predict(poly_reg.fit_transform(X_test))
-    else:
-        regressor.fit(X_train, y_train)
-        y_pred = regressor.predict(X_test)
-
-    y_pred_df = pd.DataFrame(y_pred, columns=['Y predict'])
-    y_test_df = pd.DataFrame(y_test, columns=['Y test'])
-    frames = [y_pred_df, y_test_df]
-    results = pd.concat(frames, axis=1)
-
-    results['Y predict'] = results['Y predict'].map('{:,.0f}'.format)
-    results['Y test'] = results['Y test'].map('{:,}'.format)
-
-    columns = [{'name': col, 'id': col} for col in results.columns]
-    data = results.to_dict(orient='records')
-
-    if button == 'Table':
-        return {'display': 'none'}, {'display': 'block'}, data, columns
-    if button == 'Graph':
-        return {'display': 'block'}, {'display': 'none'}, data, columns

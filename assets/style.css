@@ -1,5 +1,41 @@
-#submit-val .button{
- width: 5% !important;
+#slct_year .Select-value {
+  background-color: rgba(255, 204, 255, 0.6);
+}
+
+#slct_variable .Select-value{
+  background-color: rgba(47, 126, 216, 0.5);
+}
+
+#slct_group .Select-value {
+  background-color: rgba(255, 204, 255, 0.6);
+}
+
+#slct_subgrp input[type='radio']:after {
+        width: 15px;
+        height: 15px;
+        border-radius: 15px;
+        top: -2px;
+        left: -1px;
+        position: relative;
+        background-color: #d1d3d1;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+}
+
+#slct_subgrp input[type='radio']:checked:after {
+        width: 15px;
+        height: 15px;
+        border-radius: 15px;
+        top: -2px;
+        left: -1px;
+        position: relative;
+        background-color: #ffa500;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
 }
 
 .modebar{

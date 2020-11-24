@@ -37,15 +37,22 @@ layout = html.Div(children=[
                 html.Br(),
                 html.P("Select Country"),
                 dcc.Dropdown(id="slct_country",
-                             options=[{'label': c, 'value': c} for c in my_dict.keys()],
-                             multi=False,
-                             value="France",
-                             clearable=False),
+                                 options=[{'label': c, 'value': c} for c in my_dict.keys()],
+                                 multi=False,
+                                 value="France",
+                                 clearable=False,
+                                 searchable=False,
+                                 style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
+                             ),
                 html.Br(),
                 html.Div(
                     id='state_label',
                     style={'font-weight': 'bold', 'margin-bottom': '5px'}),
-                dcc.Dropdown(id="slct_state", clearable=False),
+                dcc.Dropdown(
+                    id="slct_state",
+                    clearable=False,
+                    style={'backgroundColor': 'rgba(0, 204, 153, 0.6)'}
+                ),
                 html.Div(
                     id='year_label',
                     children=[
@@ -83,20 +90,30 @@ layout = html.Div(children=[
                      html.P(html.Strong("Select Sub group")),
                      dcc.RadioItems(
                         id='slct_subgrp',
-                        inputStyle={"margin-right": "10px"}
+                        inputStyle={"margin-right": "10px", "color": "#ff9966"}
                      )
                     ],
                     style={'display': 'block'}
                 ),
-                html.Br(),
                 html.Div(
+                    id="tab_1_input",
                     children=[
-                        html.Span(u'\u25A2', style={'color': 'blue', 'backgroundColor': 'blue'}),
-                        html.P("Hello", style={'display': 'inline-block'})
-                    ]
+                        html.Br(),
+                        html.P(html.B("Input Color Guide")),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
+                        html.P("Input for Bar graph, Table and Map", style={'display': 'inline-block'}),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#00cc99', 'marginRight': 2}),
+                        html.P("Input for Bar graph and Table", style={'display': 'inline-block'}),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ff9966', 'marginRight': 2}),
+                        html.P("Input for Map", style={'display': 'inline-block'}),
+                    ],
+                    style={'display': 'block'}
                 ),
                 html.Div(
-                    id = 'variable',
+                    id='variable',
                     children=[
                         html.Br(),
                         html.P(html.Strong("Select Independent Variable")),
@@ -130,8 +147,23 @@ layout = html.Div(children=[
                                 {'label': "Random Forest", 'value': "Random"}
                             ],
                             value='Linear',
-                            clearable=False
+                            clearable=False,
+                            style={'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
                         )
+                    ],
+                    style={'display': 'block'}
+                ),
+                html.Div(
+                    id="tab_2_input",
+                    children=[
+                        html.Br(),
+                        html.P(html.B("Input Color Guide")),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
+                        html.P("Input for Scatter plot, Heat map & Bar graph", style={'display': 'inline-block'}),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#2f7ed8', 'marginRight': 2}),
+                        html.P("Input for Scatter plot & Bar graph", style={'display': 'inline-block'})
                     ],
                     style={'display': 'block'}
                 )
@@ -199,22 +231,28 @@ def set_subgroup_value(group_option):
     [Output(component_id='year_label', component_property='style'),
      Output(component_id='year', component_property='style'),
      Output(component_id='subgrp_label', component_property='style'),
-     Output(component_id='slct_subgrp', component_property='style')],
+     Output(component_id='slct_subgrp', component_property='style'),
+     Output(component_id='tab_1_input', component_property='style'),
+     Output(component_id='slct_state', component_property='style')
+     ],
     [Input(component_id='tabs', component_property='value')])
 def show_hide_element(tab):
     if tab == 'tab-1':
-        return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}, {'display': 'block'}
+        return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, \
+               {'backgroundColor': 'rgba(0, 204, 153, 0.6)'}
     if tab == 'tab-2':
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, \
+               {'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
 
 
 @app.callback(
-    Output(component_id='Model_elements', component_property='style'),
-    Output(component_id='variable', component_property='style'),
+    [Output(component_id='Model_elements', component_property='style'),
+     Output(component_id='variable', component_property='style'),
+     Output(component_id='tab_2_input', component_property='style')],
     [Input(component_id='tabs', component_property='value')])
 def show_hide_element(tab):
     if tab == 'tab-2':
-        return {'display': 'block'}, {'display': 'inline-block'}
+        return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}
     if tab == 'tab-1':
-        return {'display': 'none'}, {'display': 'none'}
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
