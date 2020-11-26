@@ -43,11 +43,12 @@ layout = html.Div(children=[
                                  clearable=False,
                                  searchable=False,
                                  style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
-                             ),
+                ),
                 html.Br(),
                 html.Div(
                     id='state_label',
-                    style={'font-weight': 'bold', 'margin-bottom': '5px'}),
+                    style={'font-weight': 'bold', 'margin-bottom': '5px'}
+                ),
                 dcc.Dropdown(
                     id="slct_state",
                     clearable=False,
@@ -207,19 +208,17 @@ def set_states_options(selected_country):
 
 
 @app.callback(
-    Output(component_id='slct_subgrp', component_property='options'),
-    [Input(component_id='slct_group', component_property='value')])
-def set_group_options(selected_group):
-    return [{'label': i, 'value': i} for i in all_options[selected_group]]
-
-
-@app.callback(
     Output(component_id='slct_state', component_property='value'),
     [Input(component_id='slct_state', component_property='options')])
 def set_states_value(country_options):
     return country_options[0]['value']
 
 
+@app.callback(
+    Output(component_id='slct_subgrp', component_property='options'),
+    [Input(component_id='slct_group', component_property='value')])
+def set_group_options(selected_group):
+    return [{'label': i, 'value': i} for i in all_options[selected_group]]
 @app.callback(
     Output(component_id='slct_subgrp', component_property='value'),
     [Input(component_id='slct_subgrp', component_property='options')])

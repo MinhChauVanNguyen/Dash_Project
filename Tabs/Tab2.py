@@ -1,3 +1,4 @@
+import dash
 from dash.dependencies import Input, Output
 import dash_html_components as html
 import dash_core_components as dcc
@@ -52,7 +53,7 @@ layout = html.Div(children=[
             dbc.Row(
                 dbc.Col(
                     children=[
-                        html.Div(id="scatter_id", children=[dcc.Graph(id="scatter")], style={'display':'block'}),
+                        html.Div(id="scatter_id", children=[dcc.Graph(id="scatter")], style={'display': 'block'}),
                         html.Div(
                             id="table_id",
                             children=[dt.DataTable(
@@ -91,14 +92,14 @@ layout = html.Div(children=[
 
 
 @app.callback(
-    [Output(component_id='scatter_id', component_property='style'),
-     Output(component_id='table_id', component_property='style'),
-     Output(component_id='heatmap', component_property='figure'),
+    [Output(component_id='heatmap', component_property='figure'),
      Output(component_id='scatter', component_property='figure'),
      Output(component_id='table_two', component_property='data'),
      Output(component_id='table_two', component_property='columns'),
      Output(component_id='feature_imp', component_property='figure'),
-     Output(component_id='r2', component_property='children')
+     Output(component_id='r2', component_property='children'),
+     Output(component_id='scatter_id', component_property='style'),
+     Output(component_id='table_id', component_property='style'),
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
@@ -108,20 +109,12 @@ layout = html.Div(children=[
      ]
 )
 def output_predict(selected_country, selected_state, selected_variable, selected_model, selected_radio):
-    data = df.loc[(df["Country"] == selected_country) & (df["State"] == selected_state)]
 
-    # add Revenue
-    selected_variable.append('Revenue')
-
-    data = data[selected_variable]
-
-    # remove Revenue
-    selected_variable.pop()
+    data = df[(df["Country"] == selected_country) & (df["State"] == selected_state)]
 
     ind_variable = selected_variable.copy()
 
     try:
-        ind_variable = selected_variable.copy()
         ind_variable.remove("Profit")
     except ValueError:
         pass
@@ -130,7 +123,6 @@ def output_predict(selected_country, selected_state, selected_variable, selected
 
     data.reset_index(inplace=True)
 
-    # HEATMAP
     heatmap_data = data.copy()
     heatmap_data = heatmap_data.apply(
         lambda x: pd.factorize(x)[0] if x.name in ['Age_Group', 'Customer_Gender', 'Year'] else x).corr(
@@ -148,7 +140,7 @@ def output_predict(selected_country, selected_state, selected_variable, selected
 
     heatmap.update_traces(dict(showscale=False))
 
-    ## REGRESSION MODEL
+    # encode categorical variable
     for i in range(len(selected_variable)):
         if selected_variable[i] != "Profit":
             data[selected_variable[i]] = LabelEncoder().fit_transform(data[selected_variable[i]].values)
@@ -156,8 +148,13 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     X = data.iloc[:, :-1].values
     y = data.iloc[:, -1].values
 
+
     # Split the data into train and test sets
+    if X.size ==0 and y.size ==0:
+        return dash.no_update, dash.no_update, [], [], dash.no_update, [], {}, {}
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
 
     # Fit the model on the train set
     poly_reg = PolynomialFeatures(degree=2)
@@ -269,9 +266,9 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     # rmse = mean_squared_error(y_test.tolist(), y_pred.tolist(), squared=False)
 
     if selected_radio == 'Table':
-        return {'display': 'none'}, {'display': 'block'}, heatmap, scatter_plt, data, columns, plot_imp, metrics
+        return heatmap, scatter_plt, data, columns, plot_imp, metrics, {'display': 'none'}, {'display': 'block'}
     if selected_radio == 'Graph':
-        return {'display': 'block'}, {'display': 'none'}, heatmap, scatter_plt, data, columns, plot_imp, metrics
+        return heatmap, scatter_plt, data, columns, plot_imp, metrics, {'display': 'block'}, {'display': 'none'}
 
 
 

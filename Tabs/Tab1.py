@@ -34,7 +34,16 @@ layout = html.Div(children=[
     html.Div(
         id="map_card",
         children=[
-            html.Div(children=[dcc.Graph(id="map")])
+            html.Div(
+                children=[
+                    dcc.Loading(
+                        id="loading",
+                        children=[html.Div(
+                            children=[dcc.Graph(id="map")]
+                        )],
+                        type="graph"
+                    )]
+            )
         ]
     )
 ])
@@ -53,14 +62,14 @@ layout = html.Div(children=[
 )
 def update_output(selected_country, selected_state, selected_group, selected_year):
     grouped_df = df.loc[
-        (df["Country"] == selected_country) & (df["State"] == selected_state)]
+        (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
 
-    try:
-        grouped_df = grouped_df[(grouped_df["Year"].isin(selected_year))]
-        if grouped_df.empty:
-            raise Exception("Data is empty")
-    except Exception:
-        print("Data is empty")
+    # try:
+    #     grouped_df = grouped_df[(grouped_df["Year"].isin(selected_year))]
+    #     if grouped_df.empty:
+    #         raise Exception("Data is empty")
+    # except Exception:
+    #     print("Data is empty")
 
     grouped_df = grouped_df.groupby(['State', selected_group, 'Product_Category']).agg({'Revenue': 'sum'})
 
@@ -261,8 +270,7 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             scope="usa",
             color='Revenue',
             hover_name="id",
-            hover_data={'id': False,
-                        'state_code': False},
+            hover_data=hover_data,
             labels={'Revenue': 'Total Revenue'},
             title='<b>USA map</b>'
             # template='plotly_dark'

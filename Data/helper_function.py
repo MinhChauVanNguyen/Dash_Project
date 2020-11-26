@@ -1,45 +1,45 @@
 def label_code(row):
-    if row['State'] == 'Oregon':
+    if row['id'] == 'Oregon':
         return 'OR'
-    elif row['State'] == 'California':
+    elif row['id'] == 'California':
         return 'CA'
-    elif row['State'] == 'Washington':
+    elif row['id'] == 'Washington':
         return 'WA'
-    elif row['State'] == 'Kentucky':
+    elif row['id'] == 'Kentucky':
         return 'KY'
-    elif row['State'] == 'Texas':
+    elif row['id'] == 'Texas':
         return 'TX'
-    elif row['State'] == 'New York':
+    elif row['id'] == 'New York':
         return 'NY'
-    elif row['State'] == 'Florida':
+    elif row['id'] == 'Florida':
         return 'FL'
-    elif row['State'] == 'Illinois':
+    elif row['id'] == 'Illinois':
         return 'IL'
-    elif row['State'] == 'South Carolina':
+    elif row['id'] == 'South Carolina':
         return 'SC'
-    elif row['State'] == 'North Carolina':
+    elif row['id'] == 'North Carolina':
         return 'NC'
-    elif row['State'] == 'Georgia':
+    elif row['id'] == 'Georgia':
         return 'GA'
-    elif row['State'] == 'Virginia':
+    elif row['id'] == 'Virginia':
         return 'VA'
-    elif row['State'] == 'Ohio':
+    elif row['id'] == 'Ohio':
         return 'OH'
-    elif row['State'] == 'Wyoming':
+    elif row['id'] == 'Wyoming':
         return 'WY'
-    elif row['State'] == 'Missouri':
+    elif row['id'] == 'Missouri':
         return 'MO'
-    elif row['State'] == 'Montana':
+    elif row['id'] == 'Montana':
         return 'MT'
-    elif row['State'] == 'Utah':
+    elif row['id'] == 'Utah':
         return 'UT'
-    elif row['State'] == 'Minnesota':
+    elif row['id'] == 'Minnesota':
         return 'MN'
-    elif row['State'] == 'Mississippi':
+    elif row['id'] == 'Mississippi':
         return 'MS'
-    elif row['State'] == 'Arizona':
+    elif row['id'] == 'Arizona':
         return 'AZ'
-    elif row['State'] == 'Alabama':
+    elif row['id'] == 'Alabama':
         return 'AL'
     else:
         return 'MA'
