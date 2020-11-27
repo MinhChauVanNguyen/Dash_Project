@@ -247,7 +247,7 @@ def output_predict(selected_country, selected_state, selected_variable, selected
                       title='Coefficients as Feature Importance'
                       if selected_model == 'Linear' or selected_model == 'Poly' or selected_model == 'SVM'
                       else 'Decision Trees Feature Importance'
-                      )
+    )
 
     plot_imp.update_layout(title_x=0.5)
 

@@ -5,6 +5,7 @@ from dash.dependencies import Input, Output
 from app import app
 
 from Data import data_processing
+from Data.helper_function import label_state
 
 df = data_processing.df
 
@@ -114,7 +115,7 @@ layout = html.Div(children=[
                     style={'display': 'block'}
                 ),
                 html.Div(
-                    id='variable',
+                    id='tab2_variables',
                     children=[
                         html.Br(),
                         html.P(html.Strong("Select Independent Variable")),
@@ -135,7 +136,7 @@ layout = html.Div(children=[
                     style={'display': 'inline-block'}
                 ),
                 html.Div(
-                    id="Model_elements",
+                    id="tab2_models",
                     children=[
                         html.P(html.Strong("Select Regression Model")),
                         dcc.Dropdown(
@@ -167,7 +168,51 @@ layout = html.Div(children=[
                         html.P("Input for Scatter plot & Bar graph", style={'display': 'inline-block'})
                     ],
                     style={'display': 'block'}
-                )
+                ),
+                html.Div(
+                    id='tab3_variables',
+                    children=[
+                        html.Br(),
+                        html.P(html.Strong("Select Independent Variable")),
+                        dcc.Dropdown(
+                            id='slct_variables',
+                            options=[
+                                {'label': "Year", 'value': "Year"},
+                                {'label': "Age group", 'value': "Age_Group"},
+                                {'label': "Product Category", 'value': "Product_Category"},
+                                {'label': "Profit", 'value': "Profit"},
+                                {'label': "Revenue", 'value': "Revenue"}
+                            ],
+                            value=['Year', 'Age_Group', 'Product_Category',
+                                   'Profit', 'Revenue'],
+                            clearable=False,
+                            multi=True
+                        ),
+                        html.Br()
+                    ],
+                    style={'display': 'inline-block'}
+                ),
+                html.Div(
+                    id="tab3_models",
+                    children=[
+                        html.P(html.Strong("Select Classification Model")),
+                        dcc.Dropdown(
+                            id='slct_class',
+                            options=[
+                                {'label': "Logistic Regression", 'value': "Logistic"},
+                                {'label': "Support Vector Machine", 'value': "SVM"},
+                                {'label': "KNN", 'value': "KNN"},
+                                {'label': "Naive Bayes", 'value': "Naive"},
+                                {'label': "Decision Tree", 'value': "Decision"},
+                                {'label': "Random Forest", 'value': "Random"}
+                            ],
+                            value='Logistic',
+                            clearable=False,
+                            style={'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
+                        )
+                    ],
+                    style={'display': 'block'}
+                ),
             ],
             style={'marginBottom': 50, 'marginTop': 25, 'marginLeft': 15, 'marginRight': 15}
         ),
@@ -177,9 +222,10 @@ layout = html.Div(children=[
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-2', children=[
+            dcc.Tabs(id="tabs", value='tab-3', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Regression results', value='tab-2'),
+                dcc.Tab(label='Binary classification', value='tab-3'),
             ]),
             html.Div(id='tabs-content')
           ]
@@ -196,14 +242,7 @@ layout = html.Div(children=[
      Output(component_id='slct_state', component_property='options')],
     [Input(component_id='slct_country', component_property='value')])
 def set_states_options(selected_country):
-    if selected_country == 'France':
-        container = "Select Department"
-    elif selected_country == 'Australia':
-        container = "Select Region"
-    elif selected_country == 'Canada':
-        container = "Select Province"
-    else:
-        container = "Select State"
+    container = label_state(country=selected_country)
     return container, [{'label': i, 'value': i} for i in my_dict[selected_country]]
 
 
@@ -239,19 +278,29 @@ def show_hide_element(tab):
     if tab == 'tab-1':
         return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, \
                {'backgroundColor': 'rgba(0, 204, 153, 0.6)'}
-    if tab == 'tab-2':
+    if tab == 'tab-2' or tab == 'tab-3':
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, \
                {'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
 
 
 @app.callback(
-    [Output(component_id='Model_elements', component_property='style'),
-     Output(component_id='variable', component_property='style'),
+    [Output(component_id='tab2_models', component_property='style'),
+     Output(component_id='tab2_variables', component_property='style'),
      Output(component_id='tab_2_input', component_property='style')],
     [Input(component_id='tabs', component_property='value')])
 def show_hide_element(tab):
     if tab == 'tab-2':
         return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}
-    if tab == 'tab-1':
+    if tab == 'tab-1' or tab == 'tab-3':
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
+
+@app.callback(
+    [Output(component_id='tab3_models', component_property='style'),
+     Output(component_id='tab3_variables', component_property='style')],
+    [Input(component_id='tabs', component_property='value')])
+def show_hide_element(tab):
+    if tab == 'tab-3':
+        return {'display': 'block'}, {'display': 'inline-block'}
+    if tab == 'tab-1' or tab == 'tab-2':
+        return {'display': 'none'}, {'display': 'none'}

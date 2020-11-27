@@ -45,3 +45,12 @@ def label_code(row):
         return 'MA'
 
 
+def label_state(country):
+    if country == 'France':
+        return "Select Department"
+    elif country == 'Australia':
+        return "Select Region"
+    elif country == 'Canada':
+        return "Select Province"
+    else:
+        return "Select State"

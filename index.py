@@ -1,7 +1,7 @@
 from dash.dependencies import Input, Output
 from app import app
 import dash_html_components as html
-from Tabs import Sidebar, Tab1, Tab2, Navbar
+from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 
 
 app.layout = html.Div(
@@ -18,6 +18,8 @@ def render_content(tab):
         return Tab1.layout
     elif tab == 'tab-2':
         return Tab2.layout
+    elif tab == 'tab-3':
+        return Tab3.layout
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ import plotly.express as px
 import requests
 
 from app import app
-from Data.helper_function import label_code
+from Data.helper_function import label_code, label_state
 from Data import data_processing
 
 df = data_processing.df
@@ -222,14 +222,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
      ]
 )
 def update_my_map(selected_country, selected_year, selected_group, selected_subgroup):
-    if selected_country == 'France':
-        container = "Select Department"
-    elif selected_country == 'Australia':
-        container = "Select Region"
-    elif selected_country == 'Canada':
-        container = "Select Province"
-    else:
-        container = "Select State"
+    container = label_state(country=selected_country)
 
     container = container.split(' ')[1]
 
