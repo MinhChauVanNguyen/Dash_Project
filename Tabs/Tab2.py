@@ -47,7 +47,7 @@ layout = html.Div(children=[
                         {'label': "Table", 'value': "Table"},
                     ],
                     value='Graph',
-                    labelStyle={'display': 'inline-block'}
+                    labelStyle={'display': 'inline-block', 'marginRight': 10}
               )]
             ),
             dbc.Row(
