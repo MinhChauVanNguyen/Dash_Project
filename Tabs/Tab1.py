@@ -228,11 +228,14 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     data = df.loc[(df["Country"] == selected_country) & (df["Year"].isin(selected_year))]
 
     data = data.groupby(['State', selected_group, 'Product_Category'])
+
     data = pd.DataFrame(data.sum().reset_index())
     data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue', selected_group]), 1, inplace=True)
 
     data = data.pivot(index=['State', selected_group], columns=['Product_Category'], values='Revenue')
+    
     data = data.fillna(0)
+    
     data.reset_index(level=['State', selected_group], inplace=True)
 
     data = data[data[selected_group] == selected_subgroup]

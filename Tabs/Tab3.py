@@ -96,26 +96,30 @@ layout = html.Div(children=[
                     dbc.Col(
                         children=[
                             dcc.Loading(
-                                id="load2",
+                                id="load3",
                                 children=[html.Div(id='classification_table')]
-                                # children=[
-                                #     dt.DataTable(
-                                #         id='classification_table',
-                                #         style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
-                                #         style_cell={'textAlign': 'center'},
-                                        # style_data_conditional= [{
-                                        #     'if': {
-                                        #         'filter_query': '{Metric} == "Male class" && {Metric} == "Female class"',
-                                        #         'column_id': 'Metric'
-                                        #     },
-                                        #     'backgroundColor': 'hotpink',
-                                        #     'color': 'white'
-                                        # }]
-                                   # )]
                             )
                         ],
                         width={"size": 5}
-                    )
+                    ),
+                    dbc.Col(
+                        children=[
+                            dcc.Loading(
+                                id="load4",
+                                children=[
+                                    html.Div(
+                                        id="hide_plt",
+                                        children=[dcc.Graph(id='feature_plt')],
+                                        style={'display': 'block'}
+                                    )
+                                ]
+                            ),
+                            html.Div(
+                                id="hide_message"
+                            )
+                        ],
+                        width={"size": 7}
+                    ),
                 ]
             )
         ],
@@ -130,7 +134,10 @@ layout = html.Div(children=[
      Output(component_id='confusion_mat', component_property='figure'),
      Output(component_id='roc_curve', component_property='figure'),
      Output(component_id='error_message', component_property='children'),
-     Output(component_id='classification_table', component_property='children')
+     Output(component_id='classification_table', component_property='children'),
+     Output(component_id='feature_plt', component_property='figure'),
+     Output(component_id='hide_plt', component_property='style'),
+     Output(component_id='hide_message', component_property='children')
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
@@ -148,7 +155,7 @@ def classification(selected_country, selected_state, selected_variable, selected
     message = "Target variable only has one class"
 
     if len(data['Customer_Gender'].unique()) != 2:
-        return {'display': 'none'}, dash.no_update, dash.no_update, message, []
+        return {'display': 'none'}, dash.no_update, dash.no_update, message, [], {'display': 'none'}, {'display': 'none'}, []
 
     X = data.drop('Customer_Gender', axis=1)
     y = data['Customer_Gender']
@@ -162,7 +169,7 @@ def classification(selected_country, selected_state, selected_variable, selected
             X[col] = label_encoder.fit_transform(X[col].astype(str))
     
     if X.size == 0 and y.size == 0:
-        return {'display': 'none'}, dash.no_update, dash.no_update, [], []
+        return {'display': 'none'}, dash.no_update, dash.no_update, [], [], dash.no_update
     else:
         # Step 1. Split the data into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -224,9 +231,7 @@ def classification(selected_country, selected_state, selected_variable, selected
         elif selected_model == "Decision" or selected_model == "Random":
             importance = np.round(selector.estimator_.feature_importances_, 2)
         else: 
-            importance = [[]]
-
-        print(type(importance))
+            importance = np.array([])
         
         kfold = model_selection.KFold(n_splits=5)
 
@@ -353,7 +358,7 @@ def classification(selected_country, selected_state, selected_variable, selected
 
         table = table.rename(columns={'index': 'Metric'})
 
-        minh = html.Div([
+        tab3_table = html.Div([
             dt.DataTable(
                 columns = [{'name': col, 'id': col} for col in table.columns],
                 data =  table.to_dict(orient='records'),
@@ -380,16 +385,23 @@ def classification(selected_country, selected_state, selected_variable, selected
                 )
             )                 
         ])
+        
+        error_message = "Target variable only has one class"
 
-        # feat_imp = pd.DataFrame({
-        #     'Variable': [x for x in selected_variable],
-        #     'Importance': importance
-        # })
+        if importance.size == 0:
+            return {'display': 'block'}, confusion, roc, [], tab3_table, dash.no_update, {'display': 'none'}, error_message
+        else:
+            feat_name = pd.DataFrame([x for x in selected_variable], columns=['Variable'])
+            feat_imp = pd.DataFrame(importance.flatten(), columns=['Importance'])
+            dat = pd.concat([feat_name, feat_imp], axis=1)
 
-        feat_name = pd.DataFrame([x for x in selected_variable], columns=['Variable'])
-        feat_imp = pd.DataFrame(importance.flatten(), columns=['Importance'])
-        dat = pd.concat([feat_name, feat_imp], axis=1)
+            dat["Indicator"] = np.where(dat["Importance"] < 0, 'Negative', 'Positive')
 
-        print(dat)
+            imp_bar = px.bar(dat,
+                        x='Variable',
+                        y='Importance',
+                        color='Indicator',
+                        title='Feature Importance'
+            )
 
-        return {'display': 'block'}, confusion, roc, [], minh
+            return {'display': 'block'}, confusion, roc, [], tab3_table, imp_bar, {'display': 'block'}, []
