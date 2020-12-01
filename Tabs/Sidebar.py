@@ -4,10 +4,10 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from app import app
 
-from Data import data_processing
+from Data.data_processing import tab12_df, my_df
 from Data.helper_function import label_state
 
-df = data_processing.df
+df = tab12_df
 
 year_list = df["Year"].unique().tolist()
 
@@ -24,6 +24,11 @@ all_options = {
     'Age_Group': df['Age_Group'].unique().tolist(),
     'Customer_Gender': df['Customer_Gender'].unique().tolist()
 }
+
+# Tab 3 variables
+my_df = my_df.drop('Customer_Gender', axis=1)
+tab3_var_list = my_df.columns.tolist()
+
 
 layout = html.Div(children=[
     dbc.Row(children=[
@@ -176,15 +181,8 @@ layout = html.Div(children=[
                         html.P(html.Strong("Select Independent Variable")),
                         dcc.Dropdown(
                             id='slct_variables',
-                            options=[
-                                {'label': "Year", 'value': "Year"},
-                                {'label': "Age group", 'value': "Age_Group"},
-                                {'label': "Product Category", 'value': "Product_Category"},
-                                {'label': "Profit", 'value': "Profit"},
-                                {'label': "Revenue", 'value': "Revenue"}
-                            ],
-                            value=['Year', 'Age_Group', 'Product_Category',
-                                   'Profit', 'Revenue'],
+                            options=[{"label": i, "value": i} for i in tab3_var_list],
+                            value=tab3_var_list[:],
                             clearable=False,
                             multi=True
                         ),

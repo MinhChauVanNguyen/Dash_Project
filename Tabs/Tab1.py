@@ -9,9 +9,9 @@ import requests
 
 from app import app
 from Data.helper_function import label_code, label_state
-from Data import data_processing
+from Data.data_processing import tab12_df
 
-df = data_processing.df
+df = tab12_df
 
 layout = html.Div(children=[
     html.Div(
@@ -100,7 +100,6 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                 {'name': 'Product Category', 'id': 'Product_Category', 'type': 'text', 'editable': True},
                 {'name': 'Revenue', 'id': 'Revenue', 'type': 'numeric', 'editable': True}
             ],
-            # columns=[{"name": i, "id": i} for i in grouped_df.columns],
             data=table_data.to_dict('records'),
             style_table={
                 'maxHeight': '20%',

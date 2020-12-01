@@ -23,9 +23,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from sklearn.metrics import r2_score, mean_squared_error
 
-from Data import data_processing
+from Data.data_processing import tab12_df
 
-df = data_processing.df
+df = tab12_df
 
 
 np.set_printoptions(precision=2)
@@ -53,7 +53,10 @@ layout = html.Div(children=[
             dbc.Row(
                 dbc.Col(
                     children=[
-                        html.Div(id="scatter_id", children=[dcc.Graph(id="scatter")], style={'display': 'block'}),
+                        html.Div(
+                            id="scatter_id", 
+                            children=[dcc.Graph(id="scatter")], 
+                            style={'display': 'block'}),
                         html.Div(
                             id="table_id",
                             children=[dt.DataTable(
