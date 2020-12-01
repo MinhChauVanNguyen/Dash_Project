@@ -155,7 +155,7 @@ def classification(selected_country, selected_state, selected_variable, selected
     message = "Target variable only has one class"
 
     if len(data['Customer_Gender'].unique()) != 2:
-        return {'display': 'none'}, dash.no_update, dash.no_update, message, [], {'display': 'none'}, {'display': 'none'}, []
+        return {'display': 'none'}, dash.no_update, dash.no_update, message, [], dash.no_update, {'display': 'none'}, []
 
     X = data.drop('Customer_Gender', axis=1)
     y = data['Customer_Gender']
@@ -169,7 +169,7 @@ def classification(selected_country, selected_state, selected_variable, selected
             X[col] = label_encoder.fit_transform(X[col].astype(str))
     
     if X.size == 0 and y.size == 0:
-        return {'display': 'none'}, dash.no_update, dash.no_update, [], [], dash.no_update
+        return {'display': 'none'}, dash.no_update, dash.no_update, [], [], dash.no_update, {'display': 'none'}, []
     else:
         # Step 1. Split the data into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
