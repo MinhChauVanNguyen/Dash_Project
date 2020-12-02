@@ -197,14 +197,14 @@ layout = html.Div(children=[
                         dcc.Dropdown(
                             id='slct_class',
                             options=[
-                                {'label': "Logistic Regression", 'value': "Logistic"},
-                                {'label': "Support Vector Machine", 'value': "SVM"},
-                                {'label': "KNN", 'value': "KNN"},
-                                {'label': "Naive Bayes", 'value': "Naive"},
-                                {'label': "Decision Tree", 'value': "Decision"},
-                                {'label': "Random Forest", 'value': "Random"}
+                                {'label': "Logistic Regression", 'value': "Logistic Regression"},
+                                {'label': "Support Vector Machine", 'value': "Support Vector Machine"},
+                                {'label': "K-Nearest Neighbors", 'value': "K-Nearest Neighbors"},
+                                {'label': "Naive Bayes", 'value': "Naive Bayes"},
+                                {'label': "Decision Tree", 'value': "Decision Tree"},
+                                {'label': "Random Forest", 'value': "Random Forest"}
                             ],
-                            value='Logistic',
+                            value='Logistic Regression',
                             clearable=False,
                             style={'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
                         )
@@ -220,7 +220,7 @@ layout = html.Div(children=[
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-1', children=[
+            dcc.Tabs(id="tabs", value='tab-3', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Regression results', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),

@@ -54,3 +54,59 @@ def label_state(country):
         return "Select Province"
     else:
         return "Select State"
+
+
+def model_information(classification):
+    if classification == 'Logistic Regression':
+        text_1 = 'Logistic Regression is a Machine Learning classification algorithm that is used ' \
+                 'to predict the probability of a categorical dependent variable. '
+        text_2 = 'Only the meaningful variables should be included. ' \
+                 'The independent variables should be independent of each other. ' \
+                 'That is, the model should have little or no multicollinearity. '
+        text_3 = 'The independent variables are linearly related to the log odds. ' \
+                 'Logistic regression requires quite large sample sizes.'
+    elif classification == 'Support Vector Machine':
+        text_1 = 'The objective of the support vector machine algorithm is to find a hyperplane in an ' \
+                 'N-dimensional space(where N is the number of features) that distinctly classifies the data points.'
+        text_2 = 'To separate the two classes of data points, there are many possible hyperplanes that ' \
+                 'could be chosen. ' \
+                 'Our objective is to find a plane that has the maximum margin, i.e the maximum distance between data points of both classes. ' \
+                 'Maximizing the margin distance provides some reinforcement so that future data points can be classified with more confidence.'
+        text_3 = 'Support vectors are data points that are closer to the hyperplane and influence the position and orientation of the hyperplane. ' \
+                 'Using these support vectors, we maximize the margin of the classifier.'
+    elif classification == 'K-Nearest Neighbors':
+        text_1 = 'The KNN algorithm assumes that similar things exist in close proximity. ' \
+                 'KNN captures the idea of similarity (sometimes called distance, proximity, or closeness) ' \
+                 'by calculating the distance between points on a graph. The straight-line distance (also called the Euclidean distance) is a popular and familiar choice.'
+        text_2 = 'Disadvantages : The algorithm gets significantly slower as the number of examples and/or predictors/independent variables increase.'
+        text_3 = 'The algorithm is simple and easy to implement. There’s no need to build a model, tune several parameters, or make additional assumptions.' \
+                 'The algorithm is versatile. It can be used for classification, regression, and search (as we will see in the next section).'
+    elif classification == 'Naive Bayes':
+        text_1 = 'A Naive Bayes classifier is a probabilistic machine learning model that’s used for classification task. ' \
+                 'The crux of the classifier is based on the Bayes theorem.'
+        text_2 = 'Using Bayes theorem, we can find the probability of A happening, given that B has occurred. Here, B is the evidence and A is the hypothesis. The assumption made here is that the predictors/features are independent. ' \
+                 'That is presence of one particular feature does not affect the other. Hence it is called naive.'
+        text_3 = 'Gaussian Naive Bayes:When the predictors take up ' \
+                 'a continuous value and are not discrete, we assume that these values are sampled ' \
+                 'from a Gaussian or Normal distribution. Naive Bayes algorithms are fast and easy to implement but ' \
+                 'their biggest disadvantage is that the requirement of predictors to be independent. In most of the real life cases, the predictors are dependent, this hinders the performance of the classifier.'
+    elif classification == 'Decision Tree':
+        text_1 = 'Decision tree learning is a supervised machine learning technique for inducing a decision tree from training data. A decision tree (also referred to as a classification tree or a reduction tree) is a predictive model' \
+                 ' which is a mapping from observations about an item to conclusions about its target value'
+        text_2 = 'In the tree structures, leaves represent classifications (also referred to as labels), ' \
+                 'nonleaf nodes are features, and branches represent conjunctions of features that lead to the classifications.' \
+                 'Building a decision tree that is consistent with a given data set is easy. The challenge lies in building good decision trees, which typically means the smallest decision trees. '
+        text_3 = 'Advantages: ' \
+                 'Easy to interpret and explain to nontechnical users.' \
+                 'Decision trees require relatively little effort from users for data preparation. ' \
+                 'Disadvantage: without proper pruning or limiting tree growth, they tend to overfit the training data, making them somewhat poor predictors.'
+    else:
+        text_1 = 'Random forest, like its name implies, consists of a large number of individual decision trees that operate as an ensemble. Each individual tree in the random forest ' \
+                 'spits out a class prediction and the class with the most votes becomes our model’s prediction'
+        text_2 = 'A large number of relatively uncorrelated models (trees) operating as a ' \
+                 'committee will outperform any of the individual constituent models.'
+        text_3 = 'Random forest ensure that the behavior of each individual tree is not ' \
+                 'too correlated with the behavior of any of the other trees in the model using ' \
+                 'Bagging (Bootstrap Aggregation) and Feature Randomness. '
+
+    return text_1, text_2, text_3
