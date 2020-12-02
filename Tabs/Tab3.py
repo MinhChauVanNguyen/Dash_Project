@@ -51,7 +51,8 @@ layout = html.Div(children=[
                         {'label': "Hide facts about model", 'value': "hide"}
                     ],
                     value='hide',
-                    labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 10}
+                    labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 10},
+                    inputStyle={"marginRight": 6}
                  )
                 ],
                 style={'display': 'inline-block'}
@@ -59,50 +60,53 @@ layout = html.Div(children=[
             html.Hr(),
             html.Div(
                 id="model_cards",
-                style={'display': 'inline-block'},
+                style={'display': 'inline-block', 'marginBottom': 25},
                 children=[dbc.Row([
                     dbc.Col(
                         children=[
                             html.Br(),
-                            dbc.Card(
-                            dbc.CardBody(
+                            dbc.Card([
+                                dbc.CardHeader(html.H4("Fact #1")),
+                                dbc.CardBody(
                                 id="card_1",
                                 children=[
-                                    html.H4("Fact #1", className="card-title"),
                                     html.Div(id="card_1_text", className="card-text")
                                 ]
-                            ))
+                            )])
                         ]
                     ),
                     dbc.Col(
                         children=[
                             html.Br(),
-                            dbc.Card(
-                            dbc.CardBody(
+                            dbc.Card([
+                                dbc.CardHeader(html.H4("Fact #2")),
+                                dbc.CardBody(
                                 id="card_2",
                                 children=[
-                                    html.H4("Fact #2", className="card-title"),
                                     html.Div(id="card_2_text", className="card-text")
                                 ]
-                            ))
+                            )], outline=True
+                            )
                         ]
                     ),
                     dbc.Col(
                         children=[
                             html.Br(),
-                            dbc.Card(
-                             dbc.CardBody(
+                            dbc.Card([
+                                dbc.CardHeader(html.H4("Fact #3")),
+                                dbc.CardBody(
                                 id="card_3",
                                 children=[
-                                    html.H4("Fact #3", className="card-title"),
                                     html.Div(id="card_3_text", className="card-text")
                                 ]
                              )
-                            )
+                            ])
                         ]
                     )
                 ]
-                )]
+                ),
+                html.Br()
+                ]
             ),
             html.Br(),
             html.Div(
@@ -122,7 +126,8 @@ layout = html.Div(children=[
                                      'value': "optimised"}
                                 ],
                                 value='not_optimised',
-                                labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 20}
+                                labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 30},
+                                inputStyle={"marginRight": 6}
                             )
                         ]
                     ),
@@ -210,7 +215,7 @@ layout = html.Div(children=[
                                 id="hide_message"
                             )
                         ],
-                        width={"size": 10}
+                        width={"size": 10, "offset": 1}
                     )
                 ]
             )
@@ -640,13 +645,6 @@ def classification(selected_country, selected_state, selected_variable, selected
                 margin=dict(l=0, r=0, t=40, b=0),
                 title_font_size=19,
                 title_font_color='#2c8cff'
-                # legend=dict(
-                #     orientation="h",
-                #     yanchor="bottom",
-                #     y=1.02,
-                #     xanchor="right",
-                #     x=1
-                # )
             )
 
             return {'display': 'block'}, confusion, roc, [], tab3_table, imp_bar, {'display': 'block'}, [], accuracy_tb
