@@ -1,4 +1,6 @@
 import pandas as pd
+
+import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -8,7 +10,7 @@ import plotly.express as px
 import requests
 
 from app import app
-from Data.helper_function import label_code, label_state
+from Data.helper_functions import label_code, label_state
 from Data.data_processing import tab12_df
 
 df = tab12_df
@@ -17,18 +19,56 @@ layout = html.Div(children=[
     html.Div(
         id="bike_volume_card",
         children=[
-            html.B("Total bike related products bought by selected country, state and group"),
+            dbc.Row(
+                children=[
+                    html.Div(
+                        html.B("Switch between graph and table outputs"),
+                        style={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 15}),
+                    dcc.RadioItems(
+                        id='slct_tab1_output',
+                        options=[
+                            {'label': "Graph", 'value': "Graph"},
+                            {'label': "Table", 'value': "Table"},
+                        ],
+                        value='Table',
+                        labelStyle={'display': 'inline-block', 'marginRight': 10},
+                        inputStyle={"marginRight": 6}
+                    )]
+            ),
             html.Hr(),
+            html.Br(),
             dbc.Row(children=[
-                dbc.Col(children=[dcc.Graph(id="bar_graph")],
-                        width={"size": 4},
-                        ),
                 dbc.Col(
-                    children=[html.Div(id='data_table')],
-                    style={'marginTop': 45},
-                    width={"size": 5, "offset": 2},
+                    children=[
+                        html.Div(
+                            id='tab1_bar',
+                            children=[
+                                dcc.Loading(dcc.Graph(id="bar_graph"))
+                            ],
+                            style={'display': 'block'}
+                        )
+                    ]
                 )
             ]
+            ),
+            html.Div(
+                id='table_title',
+                style={'text-align': 'center'}
+            ),
+            dbc.Row(
+                children=[
+                    dbc.Col(),
+                    dbc.Col(
+                        children=[
+                            html.Div(
+                                id='data_table',
+                                className='center',
+                                style={'display': 'block'}
+                            )
+                        ],
+                    ),
+                    dbc.Col()
+                ],
             )
         ]),
     html.Div(
@@ -52,15 +92,19 @@ layout = html.Div(children=[
 # callbacks for outputs
 @app.callback(
     [Output(component_id='bar_graph', component_property='figure'),
-     Output(component_id='data_table', component_property='children')
+     Output(component_id='data_table', component_property='children'),
+     Output(component_id='tab1_bar', component_property='style'),
+     Output(component_id='data_table', component_property='style'),
+     Output(component_id='table_title', component_property='children')
      ],
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_state', component_property='value'),
      Input(component_id='slct_group', component_property='value'),
-     Input(component_id='slct_year', component_property='value')
+     Input(component_id='slct_year', component_property='value'),
+     Input(component_id='slct_tab1_output', component_property='value')
      ]
 )
-def update_output(selected_country, selected_state, selected_group, selected_year):
+def update_output(selected_country, selected_state, selected_group, selected_year, selected_value):
     grouped_df = df.loc[
         (df["Country"] == selected_country) & (df["State"] == selected_state) & (df["Year"].isin(selected_year))]
 
@@ -103,12 +147,11 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
             data=table_data.to_dict('records'),
             style_table={
                 'maxHeight': '20%',
-                # 'overflowY': 'scroll',
                 'width': '30%',
                 'minWidth': '10%',
             },
             editable=True,
-            style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
+            style_header={'backgroundColor': '#d0e3e8', 'color': '#2c8cff'},
             style_data={'whiteSpace': 'auto', 'height': 'auto', 'width': 'auto'},
             style_cell={'textAlign': 'left'},
             style_data_conditional=([
@@ -116,30 +159,27 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                     'if': {
                         'filter_query': '{Age_Group} eq "Adults (35-64)"',
                     },
-                    'backgroundColor': '#FF4136',
-                    'color': 'white'
+                    'backgroundColor': '#f9b464',
                 },
                 {
                     'if': {
                         'filter_query': '{Age_Group} eq "Seniors (64+)"',
                     },
-                    'backgroundColor': 'hotpink',
-                    'color': 'white'
+                    'backgroundColor': '#e59050',
                 },
                 {
                     'if': {
                         'filter_query': '{Age_Group} eq "Young Adults (25-34)"',
                     },
-                    'backgroundColor': 'dodgerblue',
-                    'color': 'white'
+                    'backgroundColor': '#e0b184',
                 },
                 {
                     'if': {
                         'filter_query': '{Age_Group} eq "Youth (<25)"',
                     },
-                    'backgroundColor': '#7FDBFF',
-                    'color': 'white'
-                } if selected_group == "Age_Group" else
+                    'backgroundColor': '#f3d1ae',
+                }
+                if selected_group == "Age_Group" else
                 {
                     'if': {
                         'filter_query': '{Customer_Gender} eq "Female"',
@@ -160,56 +200,72 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
 
     # Plotly Express
     fig = px.bar(
+        title=f'<b>Revenue by Product types and {selected_group} for {selected_state} in {selected_country}<b>',
         data_frame=grouped_df,
         y='Revenue',
         x=selected_group,
-        # orientation="h",
         color='Product_Category',
         text='Perc',
-        category_orders={"Product_Category": ["Clothing", "Bikes", "Accessories"]},
-        opacity=0.6,
+        category_orders={"Product_Category": ["Accessories", "Bikes", "Clothing"]},
+        # opacity=0.6,
         color_discrete_map={
-            'Accessories': '#0059b2',
-            'Bikes': '#4ca6ff',
-            'Clothing': '#99ccff'},
-        hover_data={'Revenue': ':$,.0f', 'Product_Category': True},
+            'Accessories': '#e59050',
+            'Bikes': '#e0b184',
+            'Clothing': '#f3d1ae'},
+        hover_data={
+            'Revenue': ':$,.0f',
+            'Product_Category': True,
+            'Perc': False
+        },
         labels={
             'Age_Group' if selected_group == 'Age_Group' else 'Customer_Gender': '<b>Age group</b>' if selected_group == 'Age_Group' else '<b>Gender</b>',
             'Revenue': '<b>Revenue</b>',
             'Product_Category': '<b>Product Category</b>'
-        },
+        }
     )
 
     fig.update_layout(
-        width=500,
-        height=500,
         yaxis_tickprefix='$',
-        # plot_bgcolor='rgba(0,0,0,0)',
-        legend_traceorder="reversed",
-        legend=dict(yanchor="bottom", y=1.02,
-                    xanchor="right", x=1,
-                    orientation="h"),
-        xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1.5, linecolor='black'),
-        yaxis=dict(mirror=True, ticks='outside', showline=True),
-        margin=dict(l=20, r=20, t=30, b=20),
+        plot_bgcolor='rgba(0,0,0,0)',
+        legend=dict(
+            xanchor="right",
+            x=1,
+            bgcolor='#E2E2E2',
+            bordercolor='#828184',
+            borderwidth=1
+        ),
+        xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
+        yaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
+        margin=dict(l=20, r=0, t=40, b=20),
         title_x=0.53,
         font=dict(family="Helvetica Neue, sans-serif"),
         hoverlabel=dict(
-            bgcolor="white",
+            bgcolor="#E2E2E2",
             font_family="Helvetica Neue, sans-serif"
         ),
-        barmode="group"
+        barmode="group",
+        title_font_size=19,
+        title_font_color='#2c8cff'
     )
 
     fig.update_traces(
         marker_line_color='black',  # bar border color
         marker_line_width=1.5,
-        texttemplate='%{text:.2f}%',
-        width=0.25
+        texttemplate='%{text:.1f}%',
+        textposition='outside',
+        textfont_size=14,
+        width=0.25,
+        textfont=dict(
+            color="#2c8cff"
+        )
     )
-    # opacity=0.6)
 
-    return fig, table
+    table_title = html.H5(f'Revenue by Product types and {selected_group} for {selected_state} in {selected_country}')
+
+    if selected_value == 'Graph':
+        return fig, [], {'display': 'block'}, {'display': 'none'}, []
+    else:
+        return dash.no_update, table, {'display': 'none'}, {'display': 'flex'}, table_title
 
 
 @app.callback(
@@ -233,9 +289,9 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     data.drop(data.columns.difference(['State', 'Product_Category', 'Revenue', selected_group]), 1, inplace=True)
 
     data = data.pivot(index=['State', selected_group], columns=['Product_Category'], values='Revenue')
-    
+
     data = data.fillna(0)
-    
+
     data.reset_index(level=['State', selected_group], inplace=True)
 
     data = data[data[selected_group] == selected_subgroup]
@@ -350,7 +406,7 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
 
     my_map.update_layout(
         # dragmode=False,
-        margin=dict(l=20, r=0, t=50, b=20),
+        margin=dict(l=40, r=0, t=50, b=20),
         legend_title_text='<b>Total Revenue</b>',
         legend=dict(
             yanchor="top",

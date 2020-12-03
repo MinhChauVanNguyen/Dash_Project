@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from app import app
 
 from Data.data_processing import tab12_df, my_df
-from Data.helper_function import label_state
+from Data.helper_functions import label_state
 
 df = tab12_df
 
@@ -36,10 +36,10 @@ layout = html.Div(children=[
         html.Div(
             id="description-card",
             children=[
-                html.H3("Title"),
+                html.H3("Sales Dash Analytics"),
                 html.Div(
-                    id="intro",
-                    children="Explore clinic patient volume by time of day, waiting time, and care score."),
+                    id="intro"
+                ),
                 html.Br(),
                 html.P("Select Country"),
                 dcc.Dropdown(id="slct_country",
@@ -211,6 +211,17 @@ layout = html.Div(children=[
                     ],
                     style={'display': 'block'}
                 ),
+                html.Div(
+                    className='footer',
+                    children=[
+                        html.P('Statistical analysis & Data visualisation by'),
+                        html.Img(
+                            src=app.get_asset_url("Logo.png"),
+                            style={'height': '6rem'}
+                        )
+                    ],
+                    style={'marginTop': 30}
+                ),
             ],
             style={'marginBottom': 50, 'marginTop': 25, 'marginLeft': 15, 'marginRight': 15}
         ),
@@ -220,7 +231,7 @@ layout = html.Div(children=[
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-3', children=[
+            dcc.Tabs(id="tabs", value='tab-1', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Regression results', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),
@@ -233,6 +244,25 @@ layout = html.Div(children=[
       )
     ])
 ])
+
+@app.callback(
+    Output(component_id='intro', component_property='children'),
+    [Input(component_id='tabs', component_property='value')])
+def show_hide_element(tab):
+    if tab == 'tab-1':
+        return html.Div([html.Em('Exploratory analysis'),
+                      ': observe the patterns and key trends in product types and total '
+                      'revenues by Country, State, Age group and Gender.'])
+    elif tab == 'tab-2':
+        return html.Div([
+            html.Em('Regression analysis'),
+            ': building and comparing predictive models to determine '
+            'which variable(s) is/are likely to have an impact on Revenue.'])
+    else:
+        return html.Div([
+            html.Em('Classification analysis'),
+            ': differentiate the characteristics between Female and Male '
+            'classes in terms of purchasing bikes related products'])
 
 
 @app.callback(

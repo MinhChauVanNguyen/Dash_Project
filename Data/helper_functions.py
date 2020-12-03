@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def label_code(row):
     if row['id'] == 'Oregon':
         return 'OR'
@@ -110,3 +113,57 @@ def model_information(classification):
                  'Bagging (Bootstrap Aggregation) and Feature Randomness. '
 
     return text_1, text_2, text_3
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+
+def select_classification(classification):
+    if classification == "Logistic Regression":
+        classifier = LogisticRegression()
+        tuned_parameters = {
+            'C': np.linspace(.0001, 1000, 200),
+            'penalty': ['l2']
+        }
+    elif classification == "Support Vector Machine":
+        classifier = SVC(probability=True)
+        tuned_parameters = {
+            'kernel': ['rbf'],
+            'gamma': ['auto', 'scale'],
+            'degree': [3, 8],
+            'C': [1, 10, 100]
+        }
+    elif classification == "K-Nearest Neighbors":
+        classifier = KNeighborsClassifier()
+        tuned_parameters = {
+            'leaf_size': list(range(1, 30)),
+            'n_neighbors': list(range(1, 10)),
+            'p': [1, 2]
+        }
+    elif classification == "Naive Bayes":
+        classifier = GaussianNB()
+        tuned_parameters = {
+            'var_smoothing': np.logspace(0, -9, num=100)
+        }
+    elif classification == "Decision Tree":
+        classifier = DecisionTreeClassifier()
+        tuned_parameters = {
+            'max_depth': np.linspace(1, 32, 32, endpoint=True),
+            'min_samples_split': np.linspace(0.1, 1.0, 10, endpoint=True),
+            'min_samples_leaf': np.linspace(0.1, 0.5, 5, endpoint=True)
+            #'max_features': list(range(1, X_train.shape[1]))
+        }
+    else:
+        classifier = RandomForestClassifier()
+        tuned_parameters = {
+            'min_samples_split': [3, 5, 10],
+            'n_estimators': [100, 300],
+            'max_depth': [3, 5, 15, 25]
+            # 'max_features': list(range(1, X_train.shape[1]))
+        }
+    return classifier, tuned_parameters

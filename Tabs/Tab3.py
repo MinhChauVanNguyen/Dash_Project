@@ -1,7 +1,7 @@
 from app import app
 from Data.data_processing import my_df
 import pandas as pd
-from Data.helper_function import model_information
+from Data.helper_functions import model_information, select_classification
 
 import numpy as np
 import dash
@@ -30,6 +30,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.metrics import confusion_matrix, roc_curve, auc, classification_report
 from sklearn.feature_selection import SelectFromModel
+
 
 df = my_df
 df['Customer_Gender'] = df['Customer_Gender'].replace({'F': 0, 'M': 1})
@@ -306,48 +307,8 @@ def classification(selected_country, selected_state, selected_variable, selected
         X_train = sc.fit_transform(X_train)
         X_test = sc.fit_transform(X_test)
 
-        if selected_model == "Logistic Regression":
-            classifier = LogisticRegression()
-            tuned_parameters = {
-                'C': np.linspace(.0001, 1000, 200),
-                'penalty': ['l2']
-            }
-        elif selected_model == "Support Vector Machine":
-            classifier = SVC(probability=True)
-            tuned_parameters = {
-                'kernel': ['rbf', 'linear'],
-                'gamma': ['auto', 'scale'],
-                'degree': [3, 8],
-                'C': [1, 10, 100, 1000]
-            }
-        elif selected_model == "K-Nearest Neighbors":
-            classifier = KNeighborsClassifier()
-            tuned_parameters = {
-                'leaf_size': list(range(1, 50)),
-                'n_neighbors': list(range(1, 30)),
-                'p': [1, 2]
-            }
-        elif selected_model == "Naive Bayes":
-            classifier = GaussianNB()
-            tuned_parameters = {
-                'var_smoothing': np.logspace(0, -9, num=100)
-            }
-        elif selected_model == "Decision Tree":
-            classifier = DecisionTreeClassifier()
-            tuned_parameters = {
-                'max_depth': np.linspace(1, 32, 32, endpoint=True),
-                'min_samples_split': np.linspace(0.1, 1.0, 10, endpoint=True),
-                'min_samples_leaf': np.linspace(0.1, 0.5, 5, endpoint=True)
-                # 'max_features': list(range(1, X_train.shape[1]))
-            }
-        else:
-            classifier = RandomForestClassifier()
-            tuned_parameters = {
-                'min_samples_split': [3, 5, 10],
-                'n_estimators': [100, 300],
-                'max_depth': [3, 5, 15, 25]
-                # 'max_features': list(range(1, X_train.shape[1]))
-            }
+        classifier = select_classification(classification=selected_model)[0]
+        tuned_parameters = select_classification(classification=selected_model)[1]
 
         # FEATURE IMPORTANCE
         selector = SelectFromModel(estimator=classifier).fit(X_train, y_train)
@@ -398,7 +359,7 @@ def classification(selected_country, selected_state, selected_variable, selected
 
             model = grid.fit(X_train, y_train)
 
-            print('Optimized Parameters: {} '.format(model.best_params_))
+            #print('Optimized Parameters: {} '.format(model.best_params_))
 
             train_score = np.mean(
                 cross_val_score(model.best_estimator_, X_train, y_train, scoring='accuracy', cv=kfold))
@@ -412,7 +373,7 @@ def classification(selected_country, selected_state, selected_variable, selected
             fpr, tpr, threshold = roc_curve(y_test, probs)
 
             roc_title = f'<b>ROC curve (AUC={auc(fpr, tpr):.4f})'
-            caption = f'Hyperparameters: {model.best_params_}'
+            caption = f'<b>{str(model.best_params_).replace("{","").replace("}", "")}<b>'
 
             i = 0
             for train, test in grid.cv.split(X_train, y_train):
@@ -490,14 +451,10 @@ def classification(selected_country, selected_state, selected_variable, selected
         z_text = [[str(b) for b in a] for a in heat_cm]
 
         confusion = ff.create_annotated_heatmap(
-            cm, x=a, y=b, annotation_text=z_text,
-            # colorscale=[
-            #     ['TP = ', '#7A4579'], 
-            #     ['TN = ', '#7A4579'], 
-            #     ['FP = ', '#ff99cc'],
-            #     ['FN = ', '#ff99cc']
-            #     ]
-            colorscale=['#7A4579', '#7A4579', '#ff99cc', '#ff99cc', '#ff99cc']
+            z=[[1, 0], [0, 1]],
+            x=a, y=b,
+            annotation_text=z_text,
+            colorscale=[[0, 'navy'], [1, 'plum']]
         )
 
         confusion.update_layout(
@@ -584,6 +541,8 @@ def classification(selected_country, selected_state, selected_variable, selected
             )
         ])
 
+
+        ## ACCURACY TABLE
         male_correct_pred = cm[1, 0] / np.sum(cm)
         female_correct_pred = cm[0, 1] / np.sum(cm)
 
@@ -619,6 +578,7 @@ def classification(selected_country, selected_state, selected_variable, selected
             )
         ])
 
+        ## FEATURE IMPORTANCE BAR PLOT
         error_message = f'Feature Importance is not available for {selected_model}'
 
         if importance.size == 0:
