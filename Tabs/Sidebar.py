@@ -25,6 +25,10 @@ all_options = {
     'Customer_Gender': df['Customer_Gender'].unique().tolist()
 }
 
+# Tab 2 variables
+tab2_vars = my_df.drop('Revenue', axis=1)
+tab2_var_list = tab2_vars.columns.tolist()
+
 # Tab 3 variables
 my_df = my_df.drop('Customer_Gender', axis=1)
 tab3_var_list = my_df.columns.tolist()
@@ -37,9 +41,7 @@ layout = html.Div(children=[
             id="description-card",
             children=[
                 html.H3("Sales Dash Analytics"),
-                html.Div(
-                    id="intro"
-                ),
+                html.Div(id="intro"),
                 html.Br(),
                 html.P("Select Country"),
                 dcc.Dropdown(id="slct_country",
@@ -126,13 +128,8 @@ layout = html.Div(children=[
                         html.P(html.Strong("Select Independent Variable")),
                         dcc.Dropdown(
                             id='slct_variable',
-                            options=[
-                                {'label': "Year", 'value': "Year"},
-                                {'label': "Age group", 'value': "Age_Group"},
-                                {'label': "Gender", 'value': "Customer_Gender"},
-                                {'label': "Profit", 'value': "Profit"}
-                            ],
-                            value=['Year', 'Age_Group', 'Customer_Gender', 'Profit'],
+                            options=[{"label": i, "value": i} for i in tab2_var_list],
+                            value=tab2_var_list[:],
                             clearable=False,
                             multi=True
                         ),
@@ -231,9 +228,9 @@ layout = html.Div(children=[
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-1', children=[
+            dcc.Tabs(id="tabs", value='tab-2', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
-                dcc.Tab(label='Regression results', value='tab-2'),
+                dcc.Tab(label='Revenue regression', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),
             ]),
             html.Div(id='tabs-content')

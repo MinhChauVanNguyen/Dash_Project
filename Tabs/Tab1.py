@@ -70,19 +70,17 @@ layout = html.Div(children=[
                     dbc.Col()
                 ],
             )
-        ]),
+        ]
+    ),
+    html.Br(),
     html.Div(
-        id="map_card",
+        id="bike_volume_card",
         children=[
-            html.Div(
-                children=[
-                    dcc.Loading(
-                        id="loading",
-                        children=[html.Div(
-                            children=[dcc.Graph(id="map")]
-                        )],
-                        type="graph"
-                    )]
+            html.B('Map of Revenue'),
+            html.Hr(),
+            dcc.Loading(
+                children=[dcc.Graph(id="map")],
+                type="graph"
             )
         ]
     )
@@ -151,9 +149,9 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                 'minWidth': '10%',
             },
             editable=True,
-            style_header={'backgroundColor': '#d0e3e8', 'color': '#2c8cff'},
+            style_header={'backgroundColor': '#d0e3e8', 'color': '#2c8cff', 'fontWeight': 'bold'},
             style_data={'whiteSpace': 'auto', 'height': 'auto', 'width': 'auto'},
-            style_cell={'textAlign': 'left'},
+            style_cell={'textAlign': 'left', 'font-family': 'Helvetica Neue, sans-serif'},
             style_data_conditional=([
                 {
                     'if': {
@@ -269,7 +267,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
 
 
 @app.callback(
-    Output(component_id='map', component_property='figure'),
+     Output(component_id='map', component_property='figure'),
     [Input(component_id='slct_country', component_property='value'),
      Input(component_id='slct_year', component_property='value'),
      Input(component_id='slct_group', component_property='value'),
@@ -312,6 +310,12 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     for c in data2.columns[2:-1]:
         hover_data[c] = ':$,.0f'
 
+    colors = ['#7794ac', '#f0af46', '#acbdca', '#6b7077', '#b0ada7', '#d0ada7', '#d0e1e8',
+              '#d5d1cd', '#f9b464', '#afc2ca', '#8ca1a4', '#968a92', '#c4bbbe', '#5dbcd2',
+              '#e59050', '#d0dfe1', '#f3d1ae', '#acadb0', '#828184']
+
+    map_title = f'<b>Geographical distribution of Revenue by {selected_subgroup} in {selected_country}<b>'
+
     if selected_country == "United States":
         data['state_code'] = data.apply(lambda row: label_code(row), axis=1)
         my_map = px.choropleth(
@@ -321,16 +325,16 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             scope="usa",
             color='Revenue',
             hover_name="id",
+            color_discrete_sequence=colors,
             hover_data=hover_data,
             labels={'Revenue': 'Total Revenue'},
-            title='<b>USA map</b>'
-            # template='plotly_dark'
+            title=map_title
         )
 
         my_map.add_scattergeo(
             locationmode='USA-states',
             locations=data['state_code'],
-            text=data['state_code'],
+            text='<b>' + data['state_code'] + '</b>',
             mode='text',
             hoverinfo='none',
             showlegend=False
@@ -343,7 +347,6 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
         elif selected_country == 'France':
             country_url = 'https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson'
             scope = 'europe'
-
         elif selected_country == 'Germany':
             country_url = 'https://gist.githubusercontent.com/oscar6echo/4423770/raw/990e602cd47eeca87d31a3e25d2d633ed21e2005/dataBundesLander.json'
             scope = 'europe'
@@ -364,8 +367,6 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             else:
                 property['id'] = property.pop('NAME_1')
 
-        map_title = (selected_country, 'map')
-
         my_map = px.choropleth(
             data_frame=data,
             geojson=json_data,
@@ -374,9 +375,9 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             color='Revenue',
             hover_data=hover_data,
             labels={'Revenue': 'Total Revenue', 'id': container},
-            color_continuous_scale='Magma',
             scope=scope,
-            title='<b>' + " ".join(map_title) + '</b>',
+            color_discrete_sequence=colors,
+            title=map_title,
             center=dict(lat=48.864716, lon=2.349014) if selected_country == 'France' else None,
         )
 
@@ -392,11 +393,14 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
         my_map.add_scattergeo(
             geojson=json_data,
             locations=data['id'],
-            text=None if selected_country == 'France' else data['id'],
+            text=None if selected_country == 'France' else '<b>' + data['id'] + '</b>',
             showlegend=False,
             featureidkey="properties.id",
             mode='text',
             hoverinfo='none'
+            # textfont=dict(
+            #     color="black"
+            # )
         )
 
     my_map.update_traces(
@@ -405,7 +409,6 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
     )
 
     my_map.update_layout(
-        # dragmode=False,
         margin=dict(l=40, r=0, t=50, b=20),
         legend_title_text='<b>Total Revenue</b>',
         legend=dict(
@@ -413,11 +416,17 @@ def update_my_map(selected_country, selected_year, selected_group, selected_subg
             y=0.99,
             xanchor="left",
             x=0.01,
-            font=dict(size=12)
+            font=dict(size=12),
         ),
         title_x=0.5,
         uniformtext_minsize=12,
-        uniformtext_mode='hide'
+        uniformtext_mode='hide',
+        title_font_size=19,
+        title_font_color='#2c8cff',
+        hoverlabel=dict(
+            bgcolor="#E2E2E2",
+            font_family="Helvetica Neue, sans-serif"
+        )
     )
 
     return my_map

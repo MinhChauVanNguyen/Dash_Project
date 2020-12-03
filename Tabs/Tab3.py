@@ -292,6 +292,7 @@ def classification(selected_country, selected_state, selected_variable, selected
     X['Year'] = X['Year'].apply(str)
 
     label_encoder = LabelEncoder()
+
     for i, col in enumerate(X):
         if X[col].dtype == 'object':
             X[col] = label_encoder.fit_transform(X[col].astype(str))
