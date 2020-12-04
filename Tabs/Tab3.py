@@ -31,7 +31,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, roc_curve, auc, classification_report
 from sklearn.feature_selection import SelectFromModel
 
-
 df = my_df
 df['Customer_Gender'] = df['Customer_Gender'].replace({'F': 0, 'M': 1})
 
@@ -45,16 +44,16 @@ layout = html.Div(children=[
             ),
             html.Div(
                 children=[
-                 dcc.RadioItems(
-                    id='cards_radio',
-                    options=[
-                        {'label': "Show facts about model", 'value': "show"},
-                        {'label': "Hide facts about model", 'value': "hide"}
-                    ],
-                    value='hide',
-                    labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 10},
-                    inputStyle={"marginRight": 6}
-                 )
+                    dcc.RadioItems(
+                        id='cards_radio',
+                        options=[
+                            {'label': "Show facts about model", 'value': "show"},
+                            {'label': "Hide facts about model", 'value': "hide"}
+                        ],
+                        value='hide',
+                        labelStyle={'display': 'inline-block', 'marginRight': 10, 'marginLeft': 10},
+                        inputStyle={"marginRight": 6}
+                    )
                 ],
                 style={'display': 'inline-block'}
             ),
@@ -69,11 +68,12 @@ layout = html.Div(children=[
                             dbc.Card([
                                 dbc.CardHeader(html.H4("Fact #1")),
                                 dbc.CardBody(
-                                id="card_1",
-                                children=[
-                                    html.Div(id="card_1_text", className="card-text")
-                                ]
-                            )])
+                                    id="card_1",
+                                    children=[
+                                        html.Div(id="card_1_text", className="card-text")
+                                    ]
+                                )], color='primary'
+                            )
                         ]
                     ),
                     dbc.Col(
@@ -82,11 +82,11 @@ layout = html.Div(children=[
                             dbc.Card([
                                 dbc.CardHeader(html.H4("Fact #2")),
                                 dbc.CardBody(
-                                id="card_2",
-                                children=[
-                                    html.Div(id="card_2_text", className="card-text")
-                                ]
-                            )], outline=True
+                                    id="card_2",
+                                    children=[
+                                        html.Div(id="card_2_text", className="card-text")
+                                    ]
+                                )], color='primary'
                             )
                         ]
                     ),
@@ -96,17 +96,18 @@ layout = html.Div(children=[
                             dbc.Card([
                                 dbc.CardHeader(html.H4("Fact #3")),
                                 dbc.CardBody(
-                                id="card_3",
-                                children=[
-                                    html.Div(id="card_3_text", className="card-text")
-                                ]
-                             )
-                            ])
+                                    id="card_3",
+                                    children=[
+                                        html.Div(id="card_3_text", className="card-text")
+                                    ]
+                                )
+                            ], color='primary'
+                            )
                         ]
                     )
                 ]
                 ),
-                html.Br()
+                    html.Br()
                 ]
             ),
             html.Br(),
@@ -117,7 +118,8 @@ layout = html.Div(children=[
                         children=[
                             html.Div(children=[
                                 html.B("Optimise model by hyperparameters tuning"),
-                                html.Small(" (Please be aware that model tuning can take a long time due to lengthy combination of hyperparameters)")],
+                                html.Small(
+                                    " (Please be aware that model tuning can take a long time due to lengthy combination of hyperparameters)")],
                                 style={'marginRight': 10, 'marginLeft': 10, 'display': 'inline-block'}),
                             dcc.RadioItems(
                                 id='optimise',
@@ -349,7 +351,13 @@ def classification(selected_country, selected_state, selected_variable, selected
             fpr, tpr, thresholds = roc_curve(y_test, y_score)
 
             roc.add_trace(
-                go.Scatter(x=fpr, y=tpr, mode='lines')
+                go.Scatter(
+                    x=fpr, y=tpr,
+                    fill='tozeroy',
+                    fillcolor='#f3d1ae',
+                    # mode='lines',
+                    line=dict(color='#e59050')
+                )
             )
 
             roc_title = f'<b>ROC curve (AUC={auc(fpr, tpr):.4f})<b>'
@@ -360,7 +368,7 @@ def classification(selected_country, selected_state, selected_variable, selected
 
             model = grid.fit(X_train, y_train)
 
-            #print('Optimized Parameters: {} '.format(model.best_params_))
+            # print('Optimized Parameters: {} '.format(model.best_params_))
 
             train_score = np.mean(
                 cross_val_score(model.best_estimator_, X_train, y_train, scoring='accuracy', cv=kfold))
@@ -370,11 +378,8 @@ def classification(selected_country, selected_state, selected_variable, selected
             # Confusion matrix
             y_pred = model.predict(X_test)
 
-            probs = grid.predict_proba(X_test)[:, 1]
-            fpr, tpr, threshold = roc_curve(y_test, probs)
-
-            roc_title = f'<b>ROC curve (AUC={auc(fpr, tpr):.4f})'
-            caption = f'<b>{str(model.best_params_).replace("{","").replace("}", "")}<b>'
+            roc_title = f'<b>ROC curve (Mean AUC={grid.best_score_:.4f})'
+            caption = f'<b>{str(model.best_params_).replace("{", "").replace("}", "")}<b>'
 
             i = 0
             for train, test in grid.cv.split(X_train, y_train):
@@ -389,52 +394,16 @@ def classification(selected_country, selected_state, selected_variable, selected
 
                 name = 'ROC fold %d (AUC = %0.2f)' % (i, roc_auc)
 
+                color = ['#c4bbbe', '#5dbcd2', '#e59050']
+
                 roc.add_trace(
-                    go.Scatter(x=fpr, y=tpr, name=name, mode='lines')
+                    go.Scatter(
+                        x=fpr, y=tpr,
+                        name=name, mode='lines',
+                        line=dict(color=color[i])
+                    )
                 )
                 i += 1
-
-            mean_tpr = np.mean(tprs, axis=0)
-            mean_tpr[-1] = 1.0
-            mean_auc = auc(mean_fpr, mean_tpr)
-            std_auc = np.std(aucs)
-
-            roc.add_trace(
-                go.Scatter(
-                    x=mean_fpr,
-                    y=mean_tpr,
-                    name=f'Mean ROC (AUC={mean_auc:.2f}&plusmn;{std_auc:.2f})',
-                    mode='lines'
-                )
-            )
-
-            std_tpr = np.std(tprs, axis=0)
-            tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-            tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-
-            roc.add_trace(
-                go.Scatter(
-                    x=mean_fpr,
-                    y=tprs_upper,
-                    fill='toself',
-                    fillcolor="#ff6692",
-                    opacity=0.5,
-                    name=f'({mean_auc:.2f}-{std_auc:.2f}), ({mean_auc:.2f}+{std_auc:.2f})'
-                )
-            )
-
-            roc.add_trace(
-                go.Scatter(
-                    x=mean_fpr,
-                    y=tprs_lower,
-                    fill='toself',
-                    fillcolor="#ff6692",
-                    opacity=0.25,
-                    name="lower",
-                    showlegend=False,
-                    mode="none"
-                )
-            )
 
         ## CONFUSION MATRIX
         cm = confusion_matrix(y_test, y_pred)
@@ -442,7 +411,8 @@ def classification(selected_country, selected_state, selected_variable, selected
         cm_labels = np.array([['FN = ', 'TN = '], ['TP = ', 'FP = ']])
 
         heat_cm = np.array([
-            [np.char.add(cm_labels[0, 0], str(cm[0, 0])), np.char.add(cm_labels[0, 1], str(cm[0, 1]))],
+            [np.char.add(cm_labels[0, 0], str(cm[0, 0])),
+             np.char.add(cm_labels[0, 1], str(cm[0, 1]))],
             [np.char.add(cm_labels[1, 0], str(cm[1, 0])), np.char.add(cm_labels[1, 1], str(cm[1, 1]))]
         ])
 
@@ -451,16 +421,21 @@ def classification(selected_country, selected_state, selected_variable, selected
 
         z_text = [[str(b) for b in a] for a in heat_cm]
 
+        z_text[0] = [s + '<b>' for s in z_text[0]]
+        z_text[0] = ['<b>' + s for s in z_text[0]]
+        z_text[1] = [s + '<b>' for s in z_text[1]]
+        z_text[1] = ['<b>' + s for s in z_text[1]]
+
         confusion = ff.create_annotated_heatmap(
             z=[[1, 0], [0, 1]],
             x=a, y=b,
             annotation_text=z_text,
-            colorscale=[[0, 'navy'], [1, 'plum']]
+            colorscale=[[0, '#5dbcd2'], [1, '#f9b464']]
         )
 
         confusion.update_layout(
             margin=dict(l=0, r=0, t=40, b=0),
-            title_text='<b>Confusion matrix<b>',
+            title_text='<b>Confusion matrix</b>',
             xaxis=dict(title="Predicted Value"),
             yaxis=dict(title="True value"),
             title_x=0.6,
@@ -469,15 +444,23 @@ def classification(selected_country, selected_state, selected_variable, selected
         )
 
         confusion['layout']['xaxis'].update(side='bottom')
+        for i in range(len(confusion.layout.annotations)):
+            confusion.layout.annotations[i].font.size = 13
 
         ## ROC-CURVE
         roc.update_layout(
+            legend=dict(
+                x=0.1,
+                y=1,
+                traceorder='normal'
+            ),
             margin=dict(l=0, r=0, t=40, b=0),
             title=roc_title,
             xaxis_title='False Positive Rate',
             yaxis_title='True Positive Rate',
-            yaxis=dict(scaleanchor="x", scaleratio=1),
-            xaxis=dict(constrain='domain'),
+            yaxis=dict(scaleanchor="x", scaleratio=1, mirror=True, ticks='outside', showline=True, linewidth=1,
+                       linecolor='black'),
+            xaxis=dict(constrain='domain', mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
             title_x=0.5,
             title_font_size=19,
             title_font_color='#2c8cff',
@@ -487,7 +470,8 @@ def classification(selected_country, selected_state, selected_variable, selected
                      x=0.5, y=0.05,
                      showarrow=False,
                      text=caption)
-            ]
+            ],
+            plot_bgcolor='rgba(0,0,0,0)'
         )
 
         ## CLASSIFICATION TABLE
@@ -518,8 +502,8 @@ def classification(selected_country, selected_state, selected_variable, selected
             dt.DataTable(
                 columns=[{'name': col, 'id': col} for col in table.columns],
                 data=table.to_dict(orient='records'),
-                style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white'},
-                style_cell={'textAlign': 'center'},
+                style_header={'fontWeight': 'bold', 'backgroundColor': '#d0dfe1'},
+                style_cell={'textAlign': 'center', 'font-family': 'Helvetica Neue, sans-serif'},
                 style_data_conditional=([
                     {
                         'if': {
@@ -542,22 +526,21 @@ def classification(selected_country, selected_state, selected_variable, selected
             )
         ])
 
-
         ## ACCURACY TABLE
         male_correct_pred = cm[1, 0] / np.sum(cm)
         female_correct_pred = cm[0, 1] / np.sum(cm)
 
         accuracy_data = {
             'Data': [f'Train data (n_train = {X_train.shape[0]})', f'Test data (n_test = {X_test.shape[0]})',
-                     '', 'Class', 'Male', 'Female'],
-            'Score': [train_score, test_score, '', 'Correct prediction', male_correct_pred, female_correct_pred]
+                     'Class', 'Male', 'Female'],
+            'Score': [train_score, test_score, 'Correct prediction', male_correct_pred, female_correct_pred]
         }
 
         accuracy_df = pd.DataFrame(accuracy_data, columns=['Data', 'Score'])
 
         accuracy_df = accuracy_df.rename(columns={'Data': f'Full data (N = {X.shape[0]})'})
 
-        row_indexes = [0, 1, 4, 5]
+        row_indexes = [0, 1, 4]
 
         for i in row_indexes:
             accuracy_df.loc[i, ['Score']] = accuracy_df.loc[i, ['Score']].apply('{:.2%}'.format)
@@ -566,14 +549,15 @@ def classification(selected_country, selected_state, selected_variable, selected
             dt.DataTable(
                 columns=[{'name': col, 'id': col} for col in accuracy_df.columns],
                 data=accuracy_df.to_dict(orient='records'),
-                style_header={'fontWeight': 'bold'},
-                style_cell={'textAlign': 'center'},
+                style_header={'fontWeight': 'bold', 'backgroundColor': '#d0dfe1'},
+                style_cell={'textAlign': 'center', 'font-family': 'Helvetica Neue, sans-serif'},
                 style_data_conditional=[
                     {
                         'if': {
-                            'row_index': 3,  # number | 'odd' | 'even'
+                            'row_index': 2,
                         },
                         'fontWeight': 'bold',
+                        'backgroundColor': '#f3d1ae'
                     }
                 ],
             )
@@ -598,14 +582,27 @@ def classification(selected_country, selected_state, selected_variable, selected
                 x='Importance',
                 orientation='h',
                 color='Indicator',
-                title='<b>Feature Importance<b>'
+                title='<b>Feature Importance<b>',
+                color_discrete_map={
+                    'Positive': '#e59050',
+                    'Negative': '#f3d1ae'
+                }
             )
 
             imp_bar.update_layout(
                 title_x=0.5,
                 margin=dict(l=0, r=0, t=40, b=0),
                 title_font_size=19,
-                title_font_color='#2c8cff'
+                title_font_color='#2c8cff',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
+                yaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
+                legend_title_text='<b>Color Indicator</b>'
+            )
+
+            imp_bar.update_xaxes(
+                gridcolor='#d0e1e8',
+                zeroline=False
             )
 
             return {'display': 'block'}, confusion, roc, [], tab3_table, imp_bar, {'display': 'block'}, [], accuracy_tb

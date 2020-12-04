@@ -1,9 +1,17 @@
+.bg-primary {
+    background-color: rgba(179, 217, 255, 0.5) !important;
+}
+
 #slct_year .Select-value {
   background-color: rgba(255, 204, 255, 0.6);
 }
 
 #slct_variable .Select-value{
-  background-color: rgba(47, 126, 216, 0.5);
+  background-color: rgba(255, 204, 255, 0.6) !important;
+}
+
+#tab3_variables .Select-value{
+  background-color: rgba(255, 204, 255, 0.6) !important;
 }
 
 #slct_group .Select-value {
@@ -11,31 +19,31 @@
 }
 
 #slct_subgrp input[type='radio']:after {
-        width: 15px;
-        height: 15px;
-        border-radius: 15px;
+        width: 16px;
+        height: 16px;
+        border-radius: 16px;
         top: -2px;
         left: -1px;
         position: relative;
-        background-color: #d1d3d1;
+        background-color: white;
         content: '';
         display: inline-block;
         visibility: visible;
-        border: 2px solid white;
+        border: 1.5px solid black;
 }
 
 #slct_subgrp input[type='radio']:checked:after {
-        width: 15px;
-        height: 15px;
-        border-radius: 15px;
+        width: 16px;
+        height: 16px;
+        border-radius: 16px;
         top: -2px;
         left: -1px;
         position: relative;
-        background-color: #ffa500;
+        background-color: rgb(0, 204, 153);
         content: '';
         display: inline-block;
         visibility: visible;
-        border: 2px solid white;
+        border: 1.5px solid black;
 }
 
 .modebar{
@@ -58,6 +66,27 @@ body {
     color: #333333;
     font-size: 15px;
     margin: 0px;
+    height: 100%;
+}
+
+
+#wrap {
+  position: relative;
+}
+
+Footer {
+  /*position: absolute;
+  bottom: 0;
+  left: 0;*/
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+  background-color: #45a1ff;
+  color: #fff;
+}
+
+Footer p {
+   font-weight: bold;
 }
 
 hr {
@@ -70,28 +99,13 @@ hr {
     background-color: rgba(130,129,132,0.5);
 }
 
-
-.footer {
-   display: flex;
-   justify-content: center;
-   padding: 5px;
-   background-color: #45a1ff;
-   color: #fff;
-}
-
-.footer p {
-   font-weight: bold;
-}
-
-/*H5 {
-    color: #2c8cff;
-    font-weight: 300;
-    margin-top: 10px;
-    margin-left: 200px;
-}*/
-
 H5, H3 {
     font-family: Acumin, "Helvetica Neue", sans-serif;
+}
+
+H5{
+   color: #2c8cff !important;
+   font-weight: 300;
 }
 
 #table_title{

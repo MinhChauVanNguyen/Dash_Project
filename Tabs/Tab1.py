@@ -30,7 +30,7 @@ layout = html.Div(children=[
                             {'label': "Graph", 'value': "Graph"},
                             {'label': "Table", 'value': "Table"},
                         ],
-                        value='Table',
+                        value='Graph',
                         labelStyle={'display': 'inline-block', 'marginRight': 10},
                         inputStyle={"marginRight": 6}
                     )]
@@ -79,8 +79,8 @@ layout = html.Div(children=[
             html.B('Map of Revenue'),
             html.Hr(),
             dcc.Loading(
-                children=[dcc.Graph(id="map")],
-                type="graph"
+                id='loading',
+                children=[dcc.Graph(id="map")]
             )
         ]
     )
@@ -182,14 +182,14 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
                     'if': {
                         'filter_query': '{Customer_Gender} eq "Female"',
                     },
-                    'backgroundColor': 'dodgerblue',
+                    'backgroundColor': '#e59050',
                     'color': 'white'
                 },
                 {
                     'if': {
                         'filter_query': '{Customer_Gender} eq "Male"',
                     },
-                    'backgroundColor': '#7FDBFF',
+                    'backgroundColor': '#f3d1ae',
                     'color': 'white'
                 }
             ])
@@ -232,6 +232,7 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
             bordercolor='#828184',
             borderwidth=1
         ),
+        legend_traceorder="reversed",
         xaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
         yaxis=dict(mirror=True, ticks='outside', showline=True, linewidth=1, linecolor='black'),
         margin=dict(l=20, r=0, t=40, b=20),
@@ -256,6 +257,11 @@ def update_output(selected_country, selected_state, selected_group, selected_yea
         textfont=dict(
             color="#2c8cff"
         )
+    )
+
+    fig.update_yaxes(
+        gridcolor='#d0e1e8',
+        zeroline=False
     )
 
     table_title = html.H5(f'Revenue by Product types and {selected_group} for {selected_state} in {selected_country}')

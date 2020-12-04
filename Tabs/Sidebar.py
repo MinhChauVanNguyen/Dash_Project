@@ -26,15 +26,16 @@ all_options = {
 }
 
 # Tab 2 variables
-tab2_vars = my_df.drop('Revenue', axis=1)
+tab2_vars = my_df.drop(['Revenue', 'Country', 'State'], axis=1)
 tab2_var_list = tab2_vars.columns.tolist()
 
 # Tab 3 variables
-my_df = my_df.drop('Customer_Gender', axis=1)
+my_df = my_df.drop(['Customer_Gender', 'Country', 'State'], axis=1)
 tab3_var_list = my_df.columns.tolist()
 
 
-layout = html.Div(children=[
+layout = html.Div(
+ children=[
     dbc.Row(children=[
       dbc.Col(
         html.Div(
@@ -113,10 +114,10 @@ layout = html.Div(children=[
                         html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
                         html.P("Input for Bar graph, Table and Map", style={'display': 'inline-block'}),
                         html.Hr(),
-                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#00cc99', 'marginRight': 2}),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#2f7ed8', 'marginRight': 2}),
                         html.P("Input for Bar graph and Table", style={'display': 'inline-block'}),
                         html.Hr(),
-                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ff9966', 'marginRight': 2}),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#00cc99', 'marginRight': 2}),
                         html.P("Input for Map", style={'display': 'inline-block'}),
                     ],
                     style={'display': 'block'}
@@ -129,7 +130,8 @@ layout = html.Div(children=[
                         dcc.Dropdown(
                             id='slct_variable',
                             options=[{"label": i, "value": i} for i in tab2_var_list],
-                            value=tab2_var_list[:],
+                            value=['Age_Group', 'Customer_Gender', 'Date', 'Day', 'Month', 'Year',
+                                   'Customer_Age', 'Product_Category', 'Sub_Category', 'Product'],
                             clearable=False,
                             multi=True
                         ),
@@ -152,7 +154,7 @@ layout = html.Div(children=[
                             ],
                             value='Linear',
                             clearable=False,
-                            style={'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
+                            style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
                         )
                     ],
                     style={'display': 'block'}
@@ -164,10 +166,7 @@ layout = html.Div(children=[
                         html.P(html.B("Input Color Guide")),
                         html.Hr(),
                         html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
-                        html.P("Input for Scatter plot, Heat map & Bar graph", style={'display': 'inline-block'}),
-                        html.Hr(),
-                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#2f7ed8', 'marginRight': 2}),
-                        html.P("Input for Scatter plot & Bar graph", style={'display': 'inline-block'})
+                        html.P("Input for Heat map, Bar plot & Table", style={'display': 'inline-block'})
                     ],
                     style={'display': 'block'}
                 ),
@@ -203,24 +202,42 @@ layout = html.Div(children=[
                             ],
                             value='Logistic Regression',
                             clearable=False,
-                            style={'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
+                            style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
                         )
                     ],
                     style={'display': 'block'}
                 ),
                 html.Div(
-                    className='footer',
+                    id="tab_3_input",
                     children=[
-                        html.P('Statistical analysis & Data visualisation by'),
-                        html.Img(
-                            src=app.get_asset_url("Logo.png"),
-                            style={'height': '6rem'}
-                        )
+                        html.Br(),
+                        html.P(html.B("Input Color Guide")),
+                        html.Hr(),
+                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
+                        html.P("Input for Confusion Matrix, ROC-AUC ", style={'display': 'inline-block', 'lineHeight': 0.5}),
+                        html.P("curve, Accuracy table, Classification table ", style={'display': 'inline-block', 'lineHeight': 0.5}),
+                        html.P("and Feature importance plot.", style={'display': 'inline-block'})
+
                     ],
-                    style={'marginTop': 30}
+                    style={'display': 'block'}
                 ),
+                html.Div(style={'marginBottom': 80}),
+                #html.Div(
+                 #   id='wrap',
+                  #  children=[
+                        html.Footer(
+                          children=[
+                            html.P('Statistical analysis & Data visualisation by'),
+                            html.Img(
+                                src=app.get_asset_url("Logo.png"),
+                                style={'height': '6rem'}
+                            )
+                          ]
+                        )
+                    #],
+                #),
             ],
-            style={'marginBottom': 50, 'marginTop': 25, 'marginLeft': 15, 'marginRight': 15}
+            style={'marginLeft': 15, 'marginRight': 15}
         ),
         width={"size": 3, "order": "first"},
         align="start"
@@ -228,7 +245,7 @@ layout = html.Div(children=[
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-2', children=[
+            dcc.Tabs(id="tabs", value='tab-3', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Revenue regression', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),
@@ -302,7 +319,7 @@ def set_subgroup_value(group_option):
 def show_hide_element(tab):
     if tab == 'tab-1':
         return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, \
-               {'backgroundColor': 'rgba(0, 204, 153, 0.6)'}
+               {'backgroundColor': 'rgba(47, 126, 216, 0.5)'}
     if tab == 'tab-2' or tab == 'tab-3':
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, \
                {'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
@@ -322,10 +339,12 @@ def show_hide_element(tab):
 
 @app.callback(
     [Output(component_id='tab3_models', component_property='style'),
-     Output(component_id='tab3_variables', component_property='style')],
+     Output(component_id='tab3_variables', component_property='style'),
+     Output(component_id='tab_3_input', component_property='style'),
+     ],
     [Input(component_id='tabs', component_property='value')])
 def show_hide_element(tab):
     if tab == 'tab-3':
-        return {'display': 'block'}, {'display': 'inline-block'}
+        return {'display': 'block'}, {'display': 'inline-block'}, {'display': 'block'}
     if tab == 'tab-1' or tab == 'tab-2':
-        return {'display': 'none'}, {'display': 'none'}
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
