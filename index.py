@@ -13,6 +13,8 @@ app = dash.Dash(
     suppress_callback_exceptions=True   # remove "Id not found in layout" message
 )
 
+server = app.server
+
 app.config.suppress_callback_exceptions = True
 
 app.layout = html.Div(
