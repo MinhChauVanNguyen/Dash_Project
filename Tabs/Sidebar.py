@@ -225,15 +225,15 @@ layout = html.Div(
                 #html.Div(
                  #   id='wrap',
                   #  children=[
-                        html.Footer(
-                          children=[
-                            html.P('Statistical analysis & Data visualisation by'),
-                            html.Img(
-                                src=app.get_asset_url("Logo.png"),
-                                style={'height': '6rem'}
-                            )
-                          ]
-                        )
+                       # html.Footer(
+                          # children=[
+                          #   html.P('Statistical analysis & Data visualisation by'),
+                          #   html.Img(
+                          #       src=app.get_asset_url("Logo.png"),
+                          #       style={'height': '6rem'}
+                          #   )
+                          # ]
+                       # )
                     #],
                 #),
             ],
