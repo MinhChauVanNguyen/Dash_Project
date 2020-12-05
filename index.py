@@ -1,7 +1,7 @@
 import dash
 from dash.dependencies import Input, Output
-from app import app
 import dash_html_components as html
+from app import app
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 import dash_bootstrap_components
 
