@@ -5,12 +5,15 @@ import dash_html_components as html
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 from app import server
 
+
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True  # remove "Id not found in layout" message
 )
+
+app.config.suppress_callback_exceptions = True
 
 app.layout = html.Div(
     children=[
