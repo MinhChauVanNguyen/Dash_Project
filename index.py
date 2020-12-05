@@ -5,7 +5,6 @@ from app import app
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 import dash_bootstrap_components
 
-server = app.server
 
 app.layout = html.Div(
     children=[

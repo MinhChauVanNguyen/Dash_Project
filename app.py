@@ -7,3 +7,5 @@ app = dash.Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True  # remove "Id not found in layout" message
 )
+
+server = app.server
