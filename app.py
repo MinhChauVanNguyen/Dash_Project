@@ -1,8 +1,3 @@
-"""
-Created on Tues, 27 Oct 2020
-@author: Minh Chau Van Nguyen
-"""
-
 import dash
 import dash_bootstrap_components as dbc
 
