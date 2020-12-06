@@ -32,6 +32,7 @@ from sklearn.metrics import confusion_matrix, roc_curve, auc, classification_rep
 from sklearn.feature_selection import SelectFromModel
 
 df = my_df
+# refactor Customer Gender
 df['Customer_Gender'] = df['Customer_Gender'].replace({'F': 0, 'M': 1})
 
 layout = html.Div(children=[
