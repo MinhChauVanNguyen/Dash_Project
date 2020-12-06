@@ -1,8 +1,10 @@
 import dash
 from dash.dependencies import Input, Output
 import dash_html_components as html
-from app import app
+from app import app, server
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
+
+server = app.server
 
 app.layout = html.Div(
     children=[
