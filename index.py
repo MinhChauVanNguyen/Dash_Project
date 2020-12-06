@@ -4,8 +4,6 @@ import dash_html_components as html
 from app import app
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 
-server = app.server
-
 app.layout = html.Div(
     children=[
         Navbar.layout,
