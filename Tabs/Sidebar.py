@@ -245,7 +245,7 @@ layout = html.Div(
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-3', children=[
+            dcc.Tabs(id="tabs", value='tab-1', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Revenue regression', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),
