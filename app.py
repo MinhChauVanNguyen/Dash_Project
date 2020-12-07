@@ -1,6 +1,6 @@
 """
-Created by Minh Chau Van Nguyen
-Start date : 23/10/2020
+Created on Tues, 27 Oct 2020
+@author: Minh Chau Van Nguyen
 """
 
 import dash
