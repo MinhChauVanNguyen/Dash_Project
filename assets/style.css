@@ -69,9 +69,15 @@ body {
     height: 100%;
 }
 
+#error_message, #hide_message {
+  font-weight: bold;
+  color: red;
+  text-align: center;
+  font-size: 17px !important;
+}
 
-#wrap {
-  position: relative;
+#accuracy_table_title, #class_table_title{
+   text-align: center !important;
 }
 
 Footer {

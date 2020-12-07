@@ -263,9 +263,11 @@ def output_predict(selected_country, selected_state, selected_variable, selected
                 'height': 'auto',
                 'lineHeight': '15px'
             },
-            style_cell={'maxWidth': '200px',
-                        'font-family': 'Helvetica Neue, sans-serif',
-                        'textAlign': 'center'},
+            style_cell={
+                'maxWidth': '200px',
+                'font-family': 'Helvetica Neue, sans-serif',
+                'textAlign': 'center'
+            },
             style_cell_conditional=[
                 {'if': {'column_id': 'Statistic'},
                  'fontWeight': 'bold',

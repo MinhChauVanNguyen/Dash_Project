@@ -164,7 +164,9 @@ layout = html.Div(children=[
             ),
             dbc.Row(children=[
                 dbc.Col(
-                    children=[html.Div(id='error_message')],
+                    children=[
+                        html.Div(id='error_message')
+                    ],
                 )
             ]),
             html.Br(),
@@ -174,12 +176,18 @@ layout = html.Div(children=[
                     dbc.Col(
                         children=[
                             html.Div(
+                                id="accuracy_table_title",
                                 children=[html.H5("Accuracy Table")],
-                                style={'text-align': 'center', 'color': '#2c8cff'}
+                                style={'color': '#2c8cff', 'display': 'block'}
                             ),
                             dcc.Loading(
                                 id="load4",
-                                children=[html.Div(id='accuracy_table')]
+                                children=[
+                                    html.Div(
+                                        id='accuracy_table',
+                                        style={'marginLeft': 15}
+                                    )
+                                ]
                             )
                         ],
                         width={"size": 5}
@@ -187,8 +195,9 @@ layout = html.Div(children=[
                     dbc.Col(
                         children=[
                             html.Div(
+                                id="class_table_title",
                                 children=[html.H5("Classification Table")],
-                                style={'text-align': 'center', 'color': '#2c8cff'}
+                                style={'color': '#2c8cff', 'display': 'block'}
                             ),
                             dcc.Loading(
                                 id="load3",
@@ -215,9 +224,7 @@ layout = html.Div(children=[
                                     )
                                 ]
                             ),
-                            html.Div(
-                                id="hide_message"
-                            )
+                            html.Div(id="hide_message")
                         ],
                         width={"size": 10, "offset": 1}
                     )
@@ -262,6 +269,8 @@ def card_text_output(selected_model):
 
 @app.callback(
     [Output(component_id='hidden', component_property='style'),
+     Output(component_id='accuracy_table_title', component_property='style'),
+     Output(component_id='class_table_title', component_property='style'),
      Output(component_id='confusion_mat', component_property='figure'),
      Output(component_id='roc_curve', component_property='figure'),
      Output(component_id='error_message', component_property='children'),
@@ -285,8 +294,8 @@ def classification(selected_country, selected_state, selected_variable, selected
     message = "Target variable only has one class"
 
     if len(data['Customer_Gender'].unique()) != 2:
-        return {'display': 'none'}, dash.no_update, dash.no_update, message, [], dash.no_update, {
-            'display': 'none'}, [], []
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, dash.no_update, dash.no_update, \
+               message, [], dash.no_update, {'display': 'none'}, [], []
 
     X = data.drop('Customer_Gender', axis=1)
     y = data['Customer_Gender']
@@ -301,7 +310,8 @@ def classification(selected_country, selected_state, selected_variable, selected
             X[col] = label_encoder.fit_transform(X[col].astype(str))
 
     if X.size == 0 and y.size == 0:
-        return {'display': 'none'}, dash.no_update, dash.no_update, [], [], dash.no_update, {'display': 'none'}, [], []
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, dash.no_update, dash.no_update, \
+               [], [], dash.no_update, {'display': 'none'}, [], []
     else:
         # Step 1. Split the data into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -558,7 +568,7 @@ def classification(selected_country, selected_state, selected_variable, selected
                             'row_index': 2,
                         },
                         'fontWeight': 'bold',
-                        'backgroundColor': '#f3d1ae'
+                        'backgroundColor': 'rgba(243, 209, 174, 0.5)'
                     }
                 ],
             )
@@ -606,4 +616,5 @@ def classification(selected_country, selected_state, selected_variable, selected
                 zeroline=False
             )
 
-            return {'display': 'block'}, confusion, roc, [], tab3_table, imp_bar, {'display': 'block'}, [], accuracy_tb
+            return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, confusion, roc, [], \
+                   tab3_table, imp_bar, {'display': 'block'}, [], accuracy_tb

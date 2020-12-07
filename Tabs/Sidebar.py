@@ -213,10 +213,15 @@ layout = html.Div(
                         html.Br(),
                         html.P(html.B("Input Color Guide")),
                         html.Hr(),
-                        html.Span(u'\u25A2', style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
-                        html.P("Input for Confusion Matrix, ROC-AUC ", style={'display': 'inline-block', 'lineHeight': 0.5}),
-                        html.P("curve, Accuracy table, Classification table ", style={'display': 'inline-block', 'lineHeight': 0.5}),
-                        html.P("and Feature importance plot.", style={'display': 'inline-block'})
+                        html.Div(
+                            children=[
+                                html.Span(u'\u25A2',
+                                          style={'color': 'black', 'backgroundColor': '#ffccff', 'marginRight': 2}),
+                                "Input for Confusion Matrix, ROC-AUC curve, Accuracy table, Classification table"
+                                "and Feature importance plot."
+                            ],
+                            style={'display': 'inline-block'}
+                        )
 
                     ],
                     style={'display': 'block'}
@@ -245,7 +250,7 @@ layout = html.Div(
       dbc.Col(
         html.Div(
           children=[
-            dcc.Tabs(id="tabs", value='tab-1', children=[
+            dcc.Tabs(id="tabs", value='tab-3', children=[
                 dcc.Tab(label='Descriptive statistics', value='tab-1'),
                 dcc.Tab(label='Revenue regression', value='tab-2'),
                 dcc.Tab(label='Binary classification', value='tab-3'),
