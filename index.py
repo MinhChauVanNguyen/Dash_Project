@@ -1,9 +1,9 @@
-import dash
 from dash.dependencies import Input, Output
 import dash_html_components as html
-from app import app, server
+from app import app
 from Tabs import Sidebar, Tab1, Tab2, Tab3, Navbar
 
+# need this to deploy to heroku
 server = app.server
 
 app.layout = html.Div(
