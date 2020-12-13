@@ -551,7 +551,7 @@ def classification(selected_country, selected_state, selected_variable, selected
 
         accuracy_df = accuracy_df.rename(columns={'Data': f'Full data (N = {X.shape[0]})'})
 
-        row_indexes = [0, 1, 4]
+        row_indexes = [0, 1, 3, 4]
 
         for i in row_indexes:
             accuracy_df.loc[i, ['Score']] = accuracy_df.loc[i, ['Score']].apply('{:.2%}'.format)
