@@ -2,7 +2,7 @@
 * published through Heroku Git
 
 * Inspired by [Dash Clinical Analytics template](https://dash-gallery.plotly.host/dash-clinical-analytics/).
-=======
+
 ## About the data
 The data used in this application is bike products sales data accumulated at 
 country and region geographical levels. Data was split into training (80%) and 
