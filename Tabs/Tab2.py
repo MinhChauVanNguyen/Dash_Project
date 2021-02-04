@@ -109,6 +109,8 @@ def output_predict(selected_country, selected_state, selected_variable, selected
         method='pearson', min_periods=1
     )
 
+    heatmap_data.columns = heatmap_data.columns.str.replace('_', ' ')
+
     heatmap = ff.create_annotated_heatmap(
         z=heatmap_data.values,
         x=list(heatmap_data.columns),
@@ -181,6 +183,8 @@ def output_predict(selected_country, selected_state, selected_variable, selected
     })
 
     feat_imp["Indicator"] = np.where(feat_imp["Importance"] < 0, 'Negative', 'Positive')
+
+    feat_imp['Variable'] = feat_imp['Variable'].str.replace('_', ' ')
 
     plot_imp = px.bar(
         feat_imp,
