@@ -303,6 +303,8 @@ def classification(selected_country, selected_state, selected_variable, selected
     X['Day'] = X['Day'].apply(str)
     X['Year'] = X['Year'].apply(str)
 
+    # Step 1. Transform categorical variable
+
     label_encoder = LabelEncoder()
 
     for i, col in enumerate(X):
@@ -313,10 +315,11 @@ def classification(selected_country, selected_state, selected_variable, selected
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, dash.no_update, dash.no_update, \
                [], [], dash.no_update, {'display': 'none'}, [], []
     else:
-        # Step 1. Split the data into train and test sets
+
+    # Step 2. Split the data into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-        # Step 2. Feature Scaling
+    # Step 3. Feature Scaling
         sc = StandardScaler()
         X_train = sc.fit_transform(X_train)
         X_test = sc.fit_transform(X_test)
@@ -324,18 +327,9 @@ def classification(selected_country, selected_state, selected_variable, selected
         classifier = select_classification(classification=selected_model)[0]
         tuned_parameters = select_classification(classification=selected_model)[1]
 
-        # FEATURE IMPORTANCE
-        selector = SelectFromModel(estimator=classifier).fit(X_train, y_train)
-
-        if selected_model == "Logistic Regression":
-            importance = np.round(selector.estimator_.coef_, 2)
-        elif selected_model == "Decision Tree" or selected_model == "Random Forest":
-            importance = np.round(selector.estimator_.feature_importances_, 2)
-        else:
-            importance = np.array([])
-
         kfold = model_selection.KFold(n_splits=3)
 
+        # ROC-AUC CURVE
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
@@ -347,16 +341,19 @@ def classification(selected_country, selected_state, selected_variable, selected
             x0=0, x1=1, y0=0, y1=1
         )
 
+        # If not optimised, fit the model without hyperparamater tuning
         if selected_radio == 'not_optimised':
+
+        # STep 4. Fit the model using train data
             model = classifier.fit(X_train, y_train)
 
             train_score = model.score(X_train, y_train)
             test_score = model.score(X_test, y_test)
 
-            # Confusion matrix
+        # Step 5. Make prediction using test data
             y_pred = model.predict(X_test)
 
-            # ROC-CURVE
+            # ROC-AUC CURVE
             y_score = model.predict_proba(X_test)[:, 1]
 
             fpr, tpr, thresholds = roc_curve(y_test, y_score)
@@ -374,9 +371,22 @@ def classification(selected_country, selected_state, selected_variable, selected
             roc_title = f'<b>ROC curve (AUC={auc(fpr, tpr):.4f})<b>'
             caption = ''
 
+            selector = SelectFromModel(estimator=classifier).fit(X_train, y_train)
+
+            if selected_model == "Logistic Regression":
+                importance = np.round(selector.estimator_.coef_, 2)
+            elif selected_model == "Decision Tree" or selected_model == "Random Forest":
+                importance = np.round(selector.estimator_.feature_importances_, 2)
+            else:
+                importance = np.array([])
+
+            error_message = f'Feature Importance is not available for {selected_model}'
+
+    # If optimised, fit the optimal model using the parameters from hyperparameter tuning
         else:
             grid = GridSearchCV(classifier, tuned_parameters, scoring='roc_auc', cv=kfold, n_jobs=-1)
 
+            # Step 4. Fit the model using train data
             model = grid.fit(X_train, y_train)
 
             # print('Optimized Parameters: {} '.format(model.best_params_))
@@ -386,7 +396,7 @@ def classification(selected_country, selected_state, selected_variable, selected
 
             test_score = np.mean(cross_val_score(model.best_estimator_, X_test, y_test, scoring='accuracy', cv=kfold))
 
-            # Confusion matrix
+        # Step 5. Make predictions using test data
             y_pred = model.predict(X_test)
 
             roc_title = f'<b>ROC curve (Mean AUC={grid.best_score_:.4f})'
@@ -415,6 +425,16 @@ def classification(selected_country, selected_state, selected_variable, selected
                     )
                 )
                 i += 1
+
+            #if selected_model in ['Decision Tree', 'Random Forest']:
+            if selected_model == "Decision Tree" or selected_model == "Random Forest":
+                importance = np.round(model.best_estimator_.feature_importances_, 2)
+            else:
+                importance = np.array([])
+
+            error_message = f'Feature Importance is not available for optimised {selected_model}'
+
+    # Step 6. Model evaluation
 
         ## CONFUSION MATRIX
         cm = confusion_matrix(y_test, y_pred)
@@ -507,7 +527,9 @@ def classification(selected_country, selected_state, selected_variable, selected
         table[table.eq('1')] = 'Male class'
         table[table.eq('0')] = 'Female class'
 
-        table = table.rename(columns={'index': 'Metric'})
+        #table = table.rename(columns={'index': 'Metric'})
+
+        table.columns = ['Metric', 'Precision', 'Recall', 'F1-score']
 
         tab3_table = html.Div([
             dt.DataTable(
@@ -575,17 +597,17 @@ def classification(selected_country, selected_state, selected_variable, selected
         ])
 
         ## FEATURE IMPORTANCE BAR PLOT
-        error_message = f'Feature Importance is not available for {selected_model}'
-
         if importance.size == 0:
-            return {'display': 'block'}, confusion, roc, [], tab3_table, dash.no_update, {
-                'display': 'none'}, error_message, accuracy_tb
+            return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, confusion, roc, [], \
+                   tab3_table, dash.no_update, {'display': 'none'}, error_message, accuracy_tb
         else:
             feat_name = pd.DataFrame([x for x in selected_variable], columns=['Variable'])
             feat_imp = pd.DataFrame(importance.flatten(), columns=['Importance'])
             dat = pd.concat([feat_name, feat_imp], axis=1)
 
             dat["Indicator"] = np.where(dat["Importance"] < 0, 'Negative', 'Positive')
+
+            dat['Variable'] = dat['Variable'].str.replace('_', ' ')
 
             imp_bar = px.bar(
                 dat,
