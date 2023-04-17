@@ -101,7 +101,8 @@ layout = html.Div(
                      html.P(html.Strong("Select Sub group")),
                      dcc.RadioItems(
                         id='slct_subgrp',
-                        inputStyle={"margin-right": "10px", "color": "#ff9966"}
+                        inputStyle={"margin-right": "10px", "color": "#ff9966"},
+                        value='Seniors (64+)'
                      )
                     ],
                     style={'display': 'block'}
