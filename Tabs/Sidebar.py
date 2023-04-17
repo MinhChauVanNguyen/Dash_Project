@@ -41,17 +41,18 @@ layout = html.Div(
         html.Div(
             id="description-card",
             children=[
-                html.H3("Sales Dash Analytics"),
+                html.H3("Dash Sales Analytics"),
                 html.Div(id="intro"),
                 html.Br(),
                 html.P("Select Country"),
-                dcc.Dropdown(id="slct_country",
-                                 options=[{'label': c, 'value': c} for c in my_dict.keys()],
-                                 multi=False,
-                                 value="France",
-                                 clearable=False,
-                                 searchable=False,
-                                 style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
+                dcc.Dropdown(
+                    id="slct_country",
+                    options=[{'label': c, 'value': c} for c in my_dict.keys()],
+                    multi=False,
+                    value="France",
+                    clearable=False,
+                    searchable=False,
+                    style={'backgroundColor': 'rgba(255, 204, 255, 0.6)'}
                 ),
                 html.Br(),
                 html.Div(
