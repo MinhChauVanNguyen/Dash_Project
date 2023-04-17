@@ -1,4 +1,4 @@
-# Sales Data Dash Analytics
+# Sales Data Analytics
 * published through Heroku Git
 
 * Inspired by [Dash Clinical Analytics template](https://dash-gallery.plotly.host/dash-clinical-analytics/).
